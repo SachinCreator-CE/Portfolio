@@ -23,7 +23,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300..600&display=swap">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&display=swap">
 <script>
-(function(){var d=document.documentElement;try{var t=localStorage.getItem('sb-theme');if(t==='dark'||t==='light')d.setAttribute('data-theme',t)}catch(e){}
+(function(){var d=document.documentElement;d.setAttribute('data-camera','');try{var t=localStorage.getItem('sb-theme');if(t==='dark'||t==='light')d.setAttribute('data-theme',t)}catch(e){}
 if(window.matchMedia&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&Element.prototype.animate){d.classList.add('motion');try{if(!sessionStorage.getItem('sb-seen'))d.classList.add('first-visit')}catch(e){d.classList.add('first-visit')}setTimeout(function(){if(!d.classList.contains('motion-ready')){d.classList.remove('motion')}},4000)}})();
 </script>
 <style>
@@ -40,6 +40,7 @@ if(window.matchMedia&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&E
   --sun:#0648DA;
   --on-sun:#F3EFE6;
   --grid:rgba(6,72,218,.04);
+  --shade:rgba(10,36,110,.42);
   --scan:#0648DA;
   --plate:#F8E7CB;
   --grain-o:.07;
@@ -55,14 +56,14 @@ if(window.matchMedia&&!matchMedia('(prefers-reduced-motion: reduce)').matches&&E
   :root:not([data-theme="light"]){
     --paper:#0E2C6B;--paper-deep:#0A2459;--ink:#F1EBDD;--graphite:#B6C4E8;
     --rule:rgba(241,235,221,.17);--rule-strong:rgba(241,235,221,.46);--pencil:#F2C75C;
-    --sun:#F1EBDD;--on-sun:#0E2C6B;--grid:rgba(241,235,221,.055);--scan:#F2C75C;--plate:#F8E7CB;--grain-o:.12;
+    --sun:#F1EBDD;--on-sun:#0E2C6B;--grid:rgba(241,235,221,.055);--scan:#F2C75C;--plate:#F8E7CB;--grain-o:.12;--shade:rgba(2,8,28,.7);
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
   --paper:#0E2C6B;--paper-deep:#0A2459;--ink:#F1EBDD;--graphite:#B6C4E8;
   --rule:rgba(241,235,221,.17);--rule-strong:rgba(241,235,221,.46);--pencil:#F2C75C;
-  --sun:#F1EBDD;--on-sun:#0E2C6B;--grid:rgba(241,235,221,.055);--scan:#F2C75C;--plate:#F8E7CB;--grain-o:.12;
+  --sun:#F1EBDD;--on-sun:#0E2C6B;--grid:rgba(241,235,221,.055);--scan:#F2C75C;--plate:#F8E7CB;--grain-o:.12;--shade:rgba(2,8,28,.7);
   color-scheme:dark;
 }
 
@@ -415,6 +416,90 @@ html.menu-open body{overflow:hidden}
 .sp-v{font:italic 400 18px/1.05 var(--font-display)}
 .sp-d{font:500 10.5px/1 var(--font-tech);letter-spacing:var(--lbl-track);text-transform:uppercase}
 @media (prefers-reduced-motion:reduce){.cs.ready:not(.closed) .cs-hold{animation:none}}
+/* the instrument lives on the cover: below it the sound switch steps aside */
+.nav .sound-toggle,.menu-foot .sound-toggle{transition:opacity .35s ease,visibility 0s}
+.off-cover .nav .sound-toggle,.off-cover .menu-foot .sound-toggle{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .35s ease,visibility 0s .35s}
+.off-cover .sb-bars i{animation:none}
+/* experiment: the cover bridge pinned behind the page as a camera rig */
+[data-camera] body{background-image:none}
+[data-camera] .cam-layer{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;contain:strict}
+[data-camera] .cam-layer .art{position:absolute;max-width:none;margin:0;overflow:hidden;pointer-events:auto;will-change:transform}
+[data-camera].off-cover .cam-layer .art{pointer-events:none}
+[data-camera].play-mode .art{transform:none!important}
+[data-camera] .cam-layer .harp-note,[data-camera] .cam-layer .lt-hint,[data-camera] .cam-layer .lt{transition:opacity .4s ease}
+[data-camera].off-cover .cam-layer .harp-note,[data-camera].off-cover .cam-layer .lt-hint,[data-camera].off-cover .cam-layer .lt{opacity:0!important}
+/* off the cover the sun is no longer a drum: it goes out and stays as a drawn circle */
+[data-camera] .art .sun{stroke:var(--ink);stroke-width:1.1;stroke-opacity:0;transition:fill-opacity .9s ease,stroke-opacity .9s ease}
+[data-camera].off-cover .art .sun{fill-opacity:0;stroke-opacity:.75}
+[data-camera] .art .on-sun{transition:opacity .9s ease,visibility 0s}
+[data-camera].off-cover .art .on-sun{opacity:0;visibility:hidden;transition:opacity .9s ease,visibility 0s .9s}
+[data-camera].off-cover .art .cable.plucked,[data-camera].off-cover .art .cable.lt-on{stroke:var(--ink)!important;stroke-width:1.05}
+[data-camera].off-cover .art .cable.back.plucked,[data-camera].off-cover .art .cable.back.lt-on{stroke-width:.7;opacity:.4!important}
+[data-camera] main,[data-camera] .site-foot{position:relative;z-index:1}
+[data-camera] main,[data-camera] .hero,[data-camera] .hero .stage{pointer-events:none}
+[data-camera] main>*:not(.hero),[data-camera] .hero .stage>*:not(.art-slot){pointer-events:auto}
+[data-camera] .art-slot{visibility:hidden}
+/* every sheet is tracing paper laid over the drawing; the last one carries its own drawing, so it is opaque */
+[data-camera] .sheet{border-top-color:transparent}
+/* each sheet keeps its paper to itself, so a sheet that opens covers the titles laid down before it */
+[data-camera] .sheet,[data-camera] .hero .stage{isolation:isolate}
+[data-camera] .sheet::before{content:"";position:absolute;z-index:-1;top:calc(-1 * var(--cam-ext,100vh));bottom:calc(-1 * var(--cam-ext,100vh));left:calc(50% - 50vw);width:100vw;pointer-events:none;
+  background-color:color-mix(in srgb,var(--paper) 93%,transparent);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:32px 32px;background-position:var(--gx,-1px) var(--gy,-1px)}
+[data-camera] .sheet.contact::before{background-color:var(--paper)}
+[data-camera] .contact{overflow:visible} /* its paper has to reach past its top; the page itself still clips sideways */
+[data-camera] .site-foot::before{content:"";position:absolute;z-index:-1;top:0;bottom:0;left:calc(50% - 50vw);width:100vw;pointer-events:none;
+  background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:32px 32px;background-position:var(--gx,-1px) var(--gy,-1px)}
+[data-camera] .art .cam-grid{fill:none;stroke:var(--grid);stroke-width:1;vector-effect:non-scaling-stroke;shape-rendering:crispEdges}
+[data-camera].play-mode .art .cam-grid{display:none}
+@media (max-width:899px){
+  [data-camera] .hero .stage::before{content:"";position:absolute;z-index:-1;top:var(--cam-cut,0px);bottom:calc(-1 * var(--cam-ext,100vh));left:calc(50% - 50vw);width:100vw;pointer-events:none;
+    background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:32px 32px;background-position:var(--gx,-1px) var(--gy,-1px);
+    box-shadow:0 -1px 0 var(--rule),0 -28px 56px -40px var(--shade)}
+}
+/* between sheets: the drawing, a detail title in the lower left, and the pencil layer */
+[data-camera] .cam-shot{position:relative;display:flex;flex-direction:column;justify-content:flex-end;height:140vh;height:140svh;pointer-events:none}
+[data-camera] .cam-shot.ga{height:172vh;height:172svh}
+[data-camera] .cam-rig{position:absolute;inset:0;transform-origin:50% 50%;will-change:transform}
+[data-camera] .cam-edge{position:fixed;left:0;top:0;width:100%;height:100%;z-index:2;pointer-events:none;overflow:visible}
+[data-camera] .cam-edge circle{fill:none}
+[data-camera] .cam-edge .ce-rim{stroke:var(--ink);stroke-width:1.3}
+[data-camera] .cam-edge .ce-shade{stroke:var(--shade)}
+[data-camera].play-mode .cam-edge{display:none}
+[data-camera] .cam-cap{position:sticky;bottom:max(9vh,52px);align-self:flex-start;display:flex;align-items:center;gap:clamp(14px,1.3vw,20px);margin:0 0 max(9vh,52px) max(calc(var(--frame) + 26px),3.6vw);padding:12px 22px 12px 12px;
+  border-radius:60px;background:color-mix(in srgb,var(--paper) 86%,transparent);box-shadow:0 0 22px 14px color-mix(in srgb,var(--paper) 86%,transparent);
+  opacity:0;translate:0 14px;transition:opacity .6s ease,translate .9s var(--ease-out)}
+[data-camera] .cam-cap.on{opacity:1;translate:none}
+[data-camera] .cc-bub{position:relative;flex:none;display:grid;grid-template-rows:1fr 1fr;width:clamp(56px,4.6vw,70px);aspect-ratio:1;border:1.5px solid var(--ink);border-radius:50%;color:var(--ink)}
+[data-camera] .cc-bub::after{content:"";position:absolute;left:0;right:0;top:50%;border-top:1px solid var(--ink)}
+[data-camera] .cc-bub b{display:grid;place-items:end center;padding-bottom:4px;font:italic 400 clamp(21px,1.75vw,27px)/1 var(--font-display)}
+[data-camera] .cc-bub.wide b{font-size:clamp(16px,1.3vw,20px)}
+[data-camera] .cc-bub i{display:grid;place-items:start center;padding-top:6px;font:500 var(--lbl)/1 var(--font-tech);font-style:normal;letter-spacing:var(--lbl-track)}
+[data-camera] .cc-txt{display:grid;justify-items:start;gap:9px}
+[data-camera] .cc-title{padding-bottom:11px;font:italic 400 clamp(28px,2.9vw,46px)/1 var(--font-display);letter-spacing:-.012em;color:var(--ink);white-space:nowrap;
+  background:linear-gradient(var(--ink),var(--ink)) 0 calc(100% - 4px)/100% 2px no-repeat,linear-gradient(var(--ink),var(--ink)) 0 100%/100% 1px no-repeat}
+[data-camera] .cc-scale{font:500 var(--lbl)/1 var(--font-tech);letter-spacing:var(--lbl-track);text-transform:uppercase;color:var(--pencil)}
+[data-camera] .cam-ink{position:absolute;left:0;top:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+[data-camera] .cam-ink .ci-ring{fill:none;stroke:var(--pencil);stroke-width:1.3;stroke-dasharray:8 6;stroke-linecap:round}
+[data-camera] .cam-ink .ci-bub{transition:opacity .25s ease}
+[data-camera] .cam-ink .ci-bub circle{fill:var(--paper);stroke:var(--pencil);stroke-width:1.3}
+[data-camera] .cam-ink .ci-bub text{font:italic 400 16px var(--font-display);fill:var(--pencil);text-anchor:middle;dominant-baseline:central}
+[data-camera] .cam-ink .ci-lead{fill:none;stroke:var(--pencil);stroke-width:1.1;stroke-dasharray:1;stroke-linecap:round}
+[data-camera] .cam-ink .ci-note path:not([pathLength]){stroke-dasharray:none}
+[data-camera] .cam-ink .ci-sketch{fill:none;stroke:var(--pencil);stroke-width:1.2;stroke-dasharray:6 6;stroke-linecap:round}
+[data-camera] .cam-ink .ci-sym{fill:none;stroke:var(--pencil);stroke-width:1.1;stroke-linejoin:round}
+[data-camera] .cam-ink .ci-dot{fill:var(--pencil)}
+[data-camera] .cam-ink .ci-txt{font:italic 400 16px var(--font-display);fill:var(--pencil);paint-order:stroke;stroke:var(--paper);stroke-width:5px;stroke-linejoin:round}
+@media (max-width:899px){
+  [data-camera] .cam-shot{height:140vh;height:140svh}
+  [data-camera] .cam-shot.ga{height:168vh;height:168svh}
+  [data-camera] .cam-cap{margin-left:var(--hx,16px);padding:10px 18px 10px 10px}
+  [data-camera] .cc-bub{width:50px}
+  [data-camera] .cc-bub b{font-size:20px;padding-bottom:3px}
+  [data-camera] .cc-bub.wide b{font-size:15px}
+  [data-camera] .cc-bub i{padding-top:4px}
+  [data-camera] .cc-title{font-size:27px;padding-bottom:10px}
+  [data-camera] .cam-ink .ci-txt,[data-camera] .cam-ink .ci-bub text{font-size:14px}
+}
 .bigcall{position:relative;isolation:isolate;display:block;margin-top:clamp(80px,9cqw,150px);padding:22px 0 30px;border-top:1px solid var(--rule-strong);border-bottom:1px solid var(--rule-strong);color:var(--ink);text-decoration:none;transition:color .5s ease}
 .bigcall::before{content:"";position:absolute;top:0;bottom:0;left:calc(min(100cqw,1752px) * -.036);right:calc(min(100cqw,1752px) * -.036);z-index:-1;background:var(--ink);transform:scaleY(0);transform-origin:50% 100%;transition:transform .85s var(--ease-out)}
 .bigcall:focus-visible{color:var(--paper)}
@@ -1329,14 +1414,14 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const motion = doc.classList.contains('motion') && !reduce && !!Element.prototype.animate;
   const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
-  const safe = (fn) => { try { fn(); } catch (err) { console.warn(err); } };
+  const safe = (fn) => { try { return fn(); } catch (err) { console.warn(err); return null; } };
   if (!motion) doc.classList.remove('motion');
   let countUpRef = null;
   const rideWanted = motion && innerWidth >= 900 && !!document.querySelector('[data-ride]');
 
   /* ---------- sound: on by default (a visitor's choice to mute is remembered), synthesized in the browser ---------- */
   const sound = (() => {
-    let ctx = null, on = true, noise = null, bus = null, hinted = -Infinity;
+    let ctx = null, on = true, noise = null, bus = null, master = null, hinted = -Infinity, zone = true;
     try { if (localStorage.getItem('sb-sound') === 'off') on = false; } catch (e) { /* storage unavailable */ }
     const tip = $('.sound-tip');
     const strings = new Map();
@@ -1353,10 +1438,11 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       }
       if (ctx.state === 'suspended') ctx.resume();
       if (!bus) {
-        bus = ctx.createGain(); bus.connect(ctx.destination);
+        master = ctx.createGain(); master.gain.value = zone ? 1 : 0; master.connect(ctx.destination);
+        bus = ctx.createGain(); bus.connect(master);
         const dl = ctx.createDelay(1), fb = ctx.createGain(), wet = ctx.createGain(), tone = ctx.createBiquadFilter();
         dl.delayTime.value = 0.19; fb.gain.value = 0.3; wet.gain.value = 0.2; tone.type = 'lowpass'; tone.frequency.value = 2600;
-        bus.connect(dl); dl.connect(tone); tone.connect(fb); fb.connect(dl); tone.connect(wet); wet.connect(ctx.destination);
+        bus.connect(dl); dl.connect(tone); tone.connect(fb); fb.connect(dl); tone.connect(wet); wet.connect(master);
       }
       return ctx;
     }
@@ -1382,7 +1468,8 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       strings.set(key, buf);
       return buf;
     }
-    const live = () => on && ctx && ctx.state === 'running';
+    // the instrument belongs to the cover sheet: below it the page is quiet
+    const live = () => on && zone && ctx && ctx.state === 'running';
     // browsers keep audio asleep until the first click, tap or key press; say so if someone tries to play first
     function hint() {
       const now = performance.now();
@@ -1393,7 +1480,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       setTimeout(() => tip.classList.remove('show'), 3200);
     }
     function pluck(freq, gain, pan, noHint, at, via) {
-      if (!on) return;
+      if (!on || !zone) return;
       if (!live()) { if (!noHint) hint(); return; }
       const now = Math.max(ctx.currentTime, at || 0), out = via || bus;
       const s = ctx.createBufferSource(); s.buffer = string(freq);
@@ -1431,7 +1518,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       const now = ctx.currentTime;
       if (last[kind] && now - last[kind] < 0.05) return;
       last[kind] = now;
-      const out = ctx.destination;
+      const out = master;
       if (kind === 'tick') tone('sine', 2300, 1500, 0.035, 0.022, out, now);
       else if (kind === 'click') tone('triangle', 540, 260, 0.08, 0.06, out, now);
       else if (kind === 'whoosh') hiss('bandpass', 280, 0.9, 0.95, 0.08, out, now, 2800);
@@ -1474,7 +1561,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
         o.frequency.setValueAtTime(f * 2.3, now);
         o.frequency.exponentialRampToValueAtTime(f * 1.04, now + 0.035);
         o.frequency.exponentialRampToValueAtTime(f * 0.86, now + dur);
-        const g = ctx.createGain(); o.connect(g); g.connect(S ? S.dest : ctx.destination);
+        const g = ctx.createGain(); o.connect(g); g.connect(S ? S.dest : master);
         env(g, now, 0.003, peak * v, i ? dur * 0.45 : dur);
         o.start(now); o.stop(now + dur + 0.05);
       });
@@ -1487,7 +1574,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
         freqs.forEach((f) => string(f));           // tune every string before the clock starts
         const dest = ctx.createGain(), via = ctx.createGain();
         dest.gain.value = mix.drum; via.gain.value = mix.strings;
-        dest.connect(ctx.destination); via.connect(bus);
+        dest.connect(master); via.connect(bus);
         return { dest, bus: via, t0: ctx.currentTime + 0.1 };
       },
       end(S, fade) {
@@ -1499,7 +1586,13 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       lag: () => (ctx ? (ctx.baseLatency || 0) + (ctx.outputLatency || 0) : 0)
     };
     function ready() { if (!on) toggle(); if (!ensure()) return Promise.resolve(); return ctx.resume().catch(() => {}); }
-    return { play, toggle, pluck, note, quantize, ready, drum, music, get on() { return on; }, get live() { return live(); } };
+    function setZone(v) {
+      if (v === zone) return;
+      zone = v;
+      if (tip && !v) tip.classList.remove('show');
+      if (ctx && master) { const t = ctx.currentTime; master.gain.cancelScheduledValues(t); master.gain.setTargetAtTime(v ? 1 : 0, t, v ? 0.05 : 0.18); }
+    }
+    return { play, toggle, pluck, note, quantize, ready, drum, music, setZone, get zone() { return zone; }, get on() { return on; }, get live() { return live(); } };
   })();
 
   /* ---------- inertial wheel scrolling (mouse wheels and trackpads only) ---------- */
@@ -1546,8 +1639,13 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
   /* ---------- phones: crop the cover drawing to the pylon and cable fan ---------- */
   const buzz = (ms) => { try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) { /* not supported */ } };
   const VB = { full: '480 100 1272 720', phone: '880 140 872 660', playWide: '880 110 872 600', playTall: '1110 150 642 610' };
+  let camera = null, harp = null; // harp is set once the cables are strung (setupHarp)
   function fitArt() {
     if (!art) return;
+    if (camera) {
+      art.setAttribute('preserveAspectRatio', doc.classList.contains('play-mode') ? 'xMidYMid meet' : 'xMidYMid slice');
+      if (!doc.classList.contains('play-mode')) { camera.refresh(); return; }
+    }
     let vb = VB.full;
     if (doc.classList.contains('play-mode')) vb = innerWidth >= innerHeight ? VB.playWide : VB.playTall;
     else if (innerWidth <= 760 && innerHeight > innerWidth * 0.8) vb = VB.phone;
@@ -2128,7 +2226,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
     addEventListener('resize', fit, { passive: true });
     return { fig, update };
   })();
-  let lastY = scrollY, ticking = false, currentSheet = '01';
+  let lastY = scrollY, ticking = false, currentSheet = '01', offCover = false;
   const sheetBar = $('.sheet-bar'), sbProg = $('.sb-prog i'), sbNum = $('[data-sb-num]'), sbName = $('[data-sb-name]');
   /* sheet 03: a train rides the journey while the stage is pinned */
   const ride = (() => {
@@ -2199,8 +2297,20 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
 
   function onScroll() {
     ticking = false;
+    if (camera) camera.update();
     const y = scrollY, vh = innerHeight;
     const heroH = hero.offsetHeight || vh;
+
+    // the cover sheet is the instrument: once half of it has gone, the music fades and the sound switch goes with it
+    const coverLeft = hero.offsetTop + heroH - y;
+    const off = offCover ? coverLeft < vh * 0.56 : coverLeft < vh * 0.5;
+    if (off !== offCover) {
+      offCover = off;
+      doc.classList.toggle('off-cover', off);
+      sound.setZone(!off);
+      if (off && harp && harp.playing) harp.stop(0.6);
+      if (off) document.dispatchEvent(new Event('sb:offcover'));
+    }
 
     // nav state
     const menuOpen = doc.classList.contains('menu-open');
@@ -2223,7 +2333,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
     if (motion) {
       // hero parallax: the sun sets as you leave the cover sheet
       const p = clamp(y / heroH, 0, 1);
-      if (art) art.style.setProperty('--sun-y', (p * 70).toFixed(2) + 'px');
+      if (art && !camera) art.style.setProperty('--sun-y', (p * 70).toFixed(2) + 'px');
       if (heroTitle && innerWidth > 899) heroTitle.style.translate = `0 ${(-p * 50).toFixed(2)}px`;
       // about: the lead statement inks in word by word
       if (leadWords) {
@@ -2289,6 +2399,369 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
   const requestTick = () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } };
   addEventListener('scroll', requestTick, { passive: true });
   addEventListener('resize', requestTick, { passive: true });
+
+  /* ---------- experiment: the cover bridge becomes a camera rig behind every sheet ----------
+     The drawing is pinned behind the page and every sheet lives inside a pencil callout on it. Scrolling into a
+     sheet, the camera dives at its callout and the sheet opens out of the circle like a porthole; scrolling out of
+     it, the sheet closes back into its circle and dissolves, leaving the detail drawn there. Between callouts the
+     camera swoops: it pulls back, travels and pushes in (van Wijk and Nuij's smooth zoom), leaning into the move.
+     The general arrangement at the end marks every detail before the last dive, into the span still to be built. */
+  camera = safe(() => {
+    if (!doc.hasAttribute('data-camera') || !motion || !art) return null;
+    const mk = (tag, attrs, parent) => { const n = document.createElementNS(SVGNS, tag); for (const k in attrs) n.setAttribute(k, attrs[k]); if (parent) parent.appendChild(n); return n; };
+    const layer = document.createElement('div'); layer.className = 'cam-layer';
+    const rig = document.createElement('div'); rig.className = 'cam-rig';
+    const ink = mk('svg', { class: 'cam-ink', 'aria-hidden': 'true', focusable: 'false' });
+    // the rim of an opening sheet, drawn above the pages: a cut edge and the shadow it throws on the drawing
+    const edge = mk('svg', { class: 'cam-edge', 'aria-hidden': 'true', focusable: 'false' });
+    const shades = [[3, 4, 0.2], [8, 6, 0.11], [15, 9, 0.05]].map(([off, w, o]) => ({ off, c: mk('circle', { class: 'ce-shade', 'stroke-width': w, opacity: o }, edge) }));
+    const rim = mk('circle', { class: 'ce-rim' }, edge);
+    edge.style.display = 'none';
+    const slot = document.createElement('div'); slot.className = 'art art-slot'; slot.setAttribute('aria-hidden', 'true');
+    art.parentNode.insertBefore(slot, art);
+    // the drawing's own graph paper, under everything else in it: it travels and zooms with the camera
+    const grid = mk('path', { class: 'cam-grid' });
+    art.insertBefore(grid, $('.sun', art) || art.firstChild);
+    rig.append(art, ink);
+    layer.append(rig);
+    document.body.insertBefore(layer, document.body.firstChild);
+    document.body.appendChild(edge);
+    art.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+
+    // framings are [centre x, centre y, width, height] in drawing units, for wide screens and for tall phone screens;
+    // ring is the callout the sheet lives in: [x, y, radius, bubble angle as a fraction of pi];
+    // drift is how the camera keeps moving while a sheet is read over it: [x, y] in screen fractions and a zoom factor
+    const SHOTS = [
+      { id: 'A', page: '#about', sheet: '02', title: 'Pylon head', scale: '1:50',
+        wide: [1440, 305, 600, 400], tall: [1466, 318, 290, 560], drift: [-0.03, 0.1, 1.05], ring: [1474, 290, 132, 0.75],
+        notes: [{ at: [1441.6, 312.1], dx: -104, dy: 46, text: 'Stay anchorages' }, { at: [1507, 214], dx: 64, dy: -40, text: 'Pylon cap' }] },
+      { id: 'B', page: '#journey', sheet: '03', title: 'Pylon foundation', scale: '1:100',
+        wide: [1420, 720, 560, 330], tall: [1470, 752, 300, 520], drift: [-0.08, 0.01, 1.03], ring: [1466, 776, 100, 1.25],
+        notes: [{ at: [1560, 771], dx: 62, dy: -54, text: 'Pile cap' }, { at: [1402, 806], dx: -64, dy: 34, text: 'Piles' }, { hfl: [1640, 775], text: 'HFL' }] },
+      { id: 'C', page: '#interests', sheet: '04', title: 'Stay cables', scale: '1:50',
+        wide: [1240, 496, 470, 320], tall: [1262, 488, 300, 540], drift: [0.05, -0.05, 1.04], ring: [1252, 506, 120, 0.75],
+        notes: [{ at: [1316.3, 468.3], dx: 58, dy: -56, text: 'Stay cable' }, { at: [1223.4, 614.2], dx: -66, dy: 42, text: 'Deck anchorage' }] },
+      { id: 'GA', page: '#contact', sheet: '05', title: 'General arrangement', scale: '1:500', contain: true, keyplan: true, mark: '05',
+        wide: [1215, 470, 1440, 800], tall: [1265, 470, 1400, 820], drift: [0, 0, 1], ring: [1830, 492, 82, 0.75],
+        sketch: [[1752, 474, 1890, 436], [1752, 548, 1890, 518]] }
+    ];
+    const shots = SHOTS.map((sh, i) => {
+      const el = document.createElement('div'); el.className = 'cam-shot' + (sh.keyplan ? ' ga' : ''); el.setAttribute('aria-hidden', 'true');
+      el.innerHTML = `<div class="cam-cap"><span class="cc-bub${sh.id.length > 1 ? ' wide' : ''}"><b>${sh.id}</b><i>${sh.sheet}</i></span><span class="cc-txt"><span class="cc-title">${sh.title}</span><span class="cc-scale">Scale ${sh.scale}</span></span></div>`;
+      const page = $(sh.page);
+      page.parentNode.insertBefore(el, page);
+      return Object.assign({ el, cap: el.firstElementChild, capOn: null, k: i, pageEl: page }, sh);
+    });
+    const last = shots.length - 1;
+
+    // the pencil layer: callout rings, their bubbles and the notes of each detail, drawn in screen pixels
+    const rings = shots.map((sh) => {
+      const g = mk('g', { class: 'ci-mark' }, ink);
+      const sketch = sh.sketch ? mk('path', { class: 'ci-sketch' }, g) : null;
+      const arc = mk('path', { class: 'ci-ring' }, g), bub = mk('g', { class: 'ci-bub' }, g);
+      const c = mk('circle', { r: 15 }, bub), t = mk('text', {}, bub); t.textContent = sh.mark || sh.id;
+      g.style.display = 'none';
+      return { k: sh.k, sh, g, arc, bub, c, sketch, shown: false };
+    });
+    const notes = shots.map((sh) => (sh.notes || []).map((n) => {
+      const g = mk('g', { class: 'ci-note' }, ink);
+      let lead = null, t;
+      if (n.hfl) { // a water level: an inverted triangle on the line, short dashes under it, and the level's name
+        mk('path', { class: 'ci-sym', d: 'M-7.5 -13H7.5L0 0Z' }, g);
+        mk('path', { class: 'ci-lead', d: 'M-11 4.5H11M-7 8.5H7M-3 12.5H3' }, g);
+        t = mk('text', { class: 'ci-txt', y: -3 }, g);
+      } else {
+        mk('circle', { class: 'ci-dot', r: 2.6 }, g);
+        lead = mk('path', { class: 'ci-lead', pathLength: 1 }, g);
+        t = mk('text', { class: 'ci-txt' }, g);
+      }
+      t.textContent = n.text;
+      g.style.display = 'none';
+      return { n, at: n.hfl || n.at, g, lead, t, w: 0, side: 0, reach: 0, shown: false };
+    }));
+    // a label sits on its preferred side of the anchor unless that runs it off the screen
+    function placeNote(nt, x) {
+      const W = M.W, pad = 10, k = Math.min(1, W / 760);
+      if (!nt.w) nt.w = nt.t.getComputedTextLength() || nt.n.text.length * 8;
+      if (nt.n.hfl) {
+        const side = x + 13 + nt.w > W - pad ? -1 : 1;
+        if (side !== nt.side) { nt.side = side; nt.t.setAttribute('x', side > 0 ? 13 : -13); nt.t.setAttribute('text-anchor', side > 0 ? 'start' : 'end'); }
+        return;
+      }
+      const dx = Math.abs(nt.n.dx) * k, dy = nt.n.dy, pref = nt.n.dx < 0 ? -1 : 1;
+      const end = (sd) => x + sd * (dx + 24 + nt.w);
+      let side = pref;
+      if (end(pref) > W - pad || end(pref) < pad) { const e = end(-pref); if (e <= W - pad && e >= pad) side = -pref; }
+      if (side === nt.side && dx === nt.reach) return;
+      nt.side = side; nt.reach = dx;
+      nt.lead.setAttribute('d', `M0 0L${(side * dx).toFixed(1)} ${dy}h${side * 18}`);
+      nt.t.setAttribute('x', (side * (dx + 24)).toFixed(1)); nt.t.setAttribute('y', dy + 5);
+      nt.t.setAttribute('text-anchor', side < 0 ? 'end' : 'start');
+    }
+
+    const clamp01 = (v) => clamp(v, 0, 1);
+    const smooth = (t) => t * t * (3 - 2 * t);
+    const ease = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+    const heroVB = () => (innerWidth <= 760 && innerHeight > innerWidth * 0.8 ? VB.phone : VB.full).split(' ').map(Number);
+    const stackedMQ = matchMedia('(max-width: 899px)'); // the cover's words sit under the drawing rather than beside it
+    function framed(sh, W, H) {
+      const [x, y, w, h] = W / H < 0.8 ? sh.tall : sh.wide;
+      return { x, y, s: sh.contain ? Math.min(W / w, H / h) : Math.max(W / w, H / h) };
+    }
+    const drifted = (sh, c, W, H) => ({ x: c.x + sh.drift[0] * W / c.s, y: c.y + sh.drift[1] * H / c.s, s: c.s * sh.drift[2] });
+    const pushed = (sh, c) => ({ x: c.x + (sh.ring[0] - c.x) * 0.3, y: c.y + (sh.ring[1] - c.y) * 0.3, s: c.s * 1.14 }); // leaning in to dive
+    const mixV = (a, b, t) => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t, s: a.s * Math.pow(b.s / a.s, t) });
+    // a flight between two views that pulls back, travels and pushes in: the path a person takes over a big drawing
+    function zoomPath(a, b, W, rho) {
+      const r2 = rho * rho, r4 = r2 * r2, w0 = W / a.s, w1 = W / b.s, dx = b.x - a.x, dy = b.y - a.y, d2 = dx * dx + dy * dy;
+      if (d2 < 1e-6) { const S = Math.log(w1 / w0) / rho; return (t) => ({ x: a.x + t * dx, y: a.y + t * dy, s: W / (w0 * Math.exp(rho * t * S)) }); }
+      const d1 = Math.sqrt(d2);
+      const b0 = (w1 * w1 - w0 * w0 + r4 * d2) / (2 * w0 * r2 * d1), b1 = (w1 * w1 - w0 * w0 - r4 * d2) / (2 * w1 * r2 * d1);
+      const q0 = Math.log(Math.sqrt(b0 * b0 + 1) - b0), q1 = Math.log(Math.sqrt(b1 * b1 + 1) - b1), S = (q1 - q0) / rho;
+      const ch = Math.cosh(q0), sh = Math.sinh(q0);
+      return (t) => {
+        const u = (w0 / (r2 * d1)) * (ch * Math.tanh(rho * t * S + q0) - sh);
+        return { x: a.x + u * dx, y: a.y + u * dy, s: W / ((w0 * ch) / Math.cosh(rho * t * S + q0)) };
+      };
+    }
+
+    // layout: where every move starts and ends on the scroll, measured once per resize
+    const RX = 0.5, RN = 0.62, BEAT = 0.12, RHO = 1.6;
+    let M = null;
+    function measure() {
+      const W = innerWidth, H = innerHeight, Y = scrollY;
+      const [x0, y0, w0, h0] = heroVB();
+      const key = `${w0} / ${h0}`;
+      if (slot.style.aspectRatio !== key) slot.style.aspectRatio = key;
+      const r = slot.getBoundingClientRect(), s0 = r.width / w0;
+      const home = { x: x0 + (W / 2 - r.left) / s0, y: y0 + (H / 2 - (r.top + Y)) / s0, s: s0 };
+      const stacked = stackedMQ.matches;
+      const stage = $('.stage', hero);
+      const cut = stage ? Math.round(r.bottom - stage.getBoundingClientRect().top) : 0;
+      if (stage) stage.style.setProperty('--cam-cut', `${cut}px`);
+      // sheets carry their paper a screen beyond each end, so an opening never shows a straight edge
+      const ext = Math.ceil(H * 1.06);
+      doc.style.setProperty('--cam-ext', `${ext}px`);
+      // every sheet's paper repeats the page grid in step with the drawing's, so lines meet where sheets meet
+      const mod = (a, n) => ((a % n) + n) % n;
+      const align = (el, dy) => {
+        if (!el) return;
+        const b = el.getBoundingClientRect();
+        el.style.setProperty('--gx', `${-mod(b.left + b.width / 2 - W / 2 + 1, 32)}px`);
+        el.style.setProperty('--gy', `${-mod(b.top + Y + dy + 1, 32)}px`);
+      };
+      $$('.sheet').forEach((el) => align(el, -ext));
+      align($('.site-foot'), 0);
+      align(stage, cut);
+      const box = (el) => { const b = el.getBoundingClientRect(); return { top: b.top + Y, bottom: b.bottom + Y, left: b.left }; };
+      const pages = shots.map((sh) => Object.assign({ el: sh.pageEl, k: sh.k, exits: sh.k < last }, box(sh.pageEl)));
+      const cover = stacked && stage ? Object.assign({ el: stage, k: 0, cover: true, exits: true }, box(stage), { bottom: hero.getBoundingClientRect().bottom + Y }) : null;
+      const cams = shots.map((sh) => framed(sh, W, H));
+      const push = shots.map((sh, i) => pushed(sh, cams[i]));
+      const ends = shots.map((sh, i) => drifted(sh, push[i], W, H));
+      const segs = [], capAt = [];
+      const add = (kind, y0, y1, extra) => { if (y1 > y0 + 0.5) segs.push(Object.assign({ kind, y0, y1 }, extra)); };
+      let y = -1e9, view = home;
+      if (cover) { // phones: the cover's sheet closes into callout A before the camera moves
+        const xs = cover.bottom - H, xe = xs + RX * H;
+        add('hold', y, xs, { a: home, b: home, i: -1 });
+        add('exit', xs, xe, { a: home, b: home, i: 0, page: cover });
+        y = xe;
+      } else { add('hold', y, H * 0.08, { a: home, b: home, i: -1 }); y = H * 0.08; }
+      shots.forEach((sh, i) => {
+        const pg = pages[i];
+        const es = Math.max(y + H * 0.3, pg.top - H), ee = es + RN * H;
+        const fe = Math.max(y + H * 0.25, es - (BEAT + (sh.keyplan ? 0.3 : 0)) * H);
+        add('fly', y, Math.min(fe, es), { path: zoomPath(view, cams[i], W, RHO), from: view, to: cams[i], i });
+        capAt[i] = y + (Math.min(fe, es) - y) * 0.15;
+        add('hold', fe, es, { a: cams[i], b: cams[i], i, beat: true });
+        add('enter', es, ee, { a: cams[i], b: push[i], i, page: pg });
+        pg.es = es; pg.ee = ee;
+        if (pg.exits) {
+          const xs = Math.max(ee + 1, pg.bottom - H), xe = xs + RX * H;
+          add('read', ee, xs, { a: push[i], b: ends[i], i, page: pg });
+          add('exit', xs, xe, { a: ends[i], b: cams[i], i, page: pg });
+          pg.xs = xs; pg.xe = xe;
+          y = xe; view = cams[i];
+        } else {
+          add('read', ee, ee + H, { a: push[i], b: push[i], i, page: pg });
+          pg.xs = pg.xe = Infinity;
+          y = ee + H;
+        }
+      });
+      if (cover) { cover.es = cover.ee = -Infinity; const c = segs.find((g) => g.page === cover); cover.xs = c.y0; cover.xe = c.y1; }
+      const ox = Math.round(W * 0.2), oy = Math.round(H * 0.2);
+      Object.assign(art.style, { left: -ox + 'px', top: -oy + 'px', width: W + 2 * ox + 'px', height: H + 2 * oy + 'px', transformOrigin: `${ox + W / 2}px ${oy + H / 2}px` });
+      ink.setAttribute('viewBox', `0 0 ${W} ${H}`);
+      edge.setAttribute('viewBox', `0 0 ${W} ${H}`);
+      const bubR = W < 600 ? 12 : 15;
+      rings.forEach((rg) => rg.c.setAttribute('r', bubR));
+      // grid lines sit where the page's own 32px grid sits on the cover, then scale with the drawing
+      const gs = 32 / s0, gx0 = home.x - (W / 2 + 0.5) / s0, gy0 = home.y - (H / 2 + 0.5) / s0;
+      const all = cover ? [cover].concat(pages) : pages;
+      all.forEach((pg) => { pg.state = ''; pg.clip = null; pg.op = null; });
+      M = { W, H, segs, ox, oy, bubR, capAt, gs, gx0, gy0, pages: all, cover, coverAt: pages[last].ee + 2 };
+      notes.forEach((list) => list.forEach((nt) => { nt.w = 0; nt.side = 0; }));
+    }
+
+    // drawing: the viewBox is only rewritten now and then; in between, the camera moves the drawing as a picture
+    // (a compositor transform), so a flight costs a few repaints instead of one per frame
+    let base = null, now = null, settleT = 0, lastTF = '', lastTilt = '', hiddenRig = false;
+    function commit(v) {
+      base = v; lastTF = 'none';
+      const { W, H, ox, oy, gs, gx0, gy0 } = M;
+      const x0 = v.x - (W / 2 + ox) / v.s, y0 = v.y - (H / 2 + oy) / v.s, w = (W + 2 * ox) / v.s, h = (H + 2 * oy) / v.s;
+      art.setAttribute('viewBox', `${x0.toFixed(2)} ${y0.toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)}`);
+      art.style.transform = 'none';
+      // only the lines that can be seen: the same lattice every time, so the grid never swims between redraws
+      let d = '';
+      for (let gx = gx0 + Math.ceil((x0 - gx0) / gs) * gs; gx <= x0 + w; gx += gs) d += `M${gx.toFixed(2)} ${y0.toFixed(1)}V${(y0 + h).toFixed(1)}`;
+      for (let gy = gy0 + Math.ceil((y0 - gy0) / gs) * gs; gy <= y0 + h; gy += gs) d += `M${x0.toFixed(1)} ${gy.toFixed(2)}H${(x0 + w).toFixed(1)}`;
+      grid.setAttribute('d', d);
+    }
+    function draw(v, force, slack) {
+      now = v;
+      if (force || !base) { commit(v); return; }
+      const { W, H, ox, oy } = M, k = v.s / base.s, tx = (base.x - v.x) * v.s, ty = (base.y - v.y) * v.s;
+      const covered = k * (W / 2 + ox) - Math.abs(tx) > W / 2 + 2 + slack * W && k * (H / 2 + oy) - Math.abs(ty) > H / 2 + 2 + slack * H;
+      if (k < 0.86 || k > 1.16 || !covered) { commit(v); return; }
+      const tf = Math.abs(k - 1) < 1e-5 && Math.abs(tx) < 0.02 && Math.abs(ty) < 0.02 ? 'none' : `translate3d(${tx.toFixed(2)}px,${ty.toFixed(2)}px,0) scale(${k.toFixed(5)})`;
+      if (tf !== lastTF) { art.style.transform = tf; lastTF = tf; }
+      clearTimeout(settleT);
+      if (tf !== 'none') settleT = setTimeout(() => { if (now && !doc.classList.contains('play-mode')) commit(now); }, 220); // crisp again at rest
+    }
+
+    // the pencil layer follows the camera; rings and notes appear and fade with the moves
+    function arcPath(cx, cy, R, f) {
+      if (f >= 0.999) return `M${(cx - R).toFixed(1)} ${cy.toFixed(1)}a${R.toFixed(1)} ${R.toFixed(1)} 0 1 0 ${(2 * R).toFixed(1)} 0a${R.toFixed(1)} ${R.toFixed(1)} 0 1 0 ${(-2 * R).toFixed(1)} 0`;
+      const a0 = -Math.PI / 2, a1 = a0 + f * Math.PI * 2;
+      return `M${(cx + R * Math.cos(a0)).toFixed(1)} ${(cy + R * Math.sin(a0)).toFixed(1)}A${R.toFixed(1)} ${R.toFixed(1)} 0 ${f > 0.5 ? 1 : 0} 1 ${(cx + R * Math.cos(a1)).toFixed(1)} ${(cy + R * Math.sin(a1)).toFixed(1)}`;
+    }
+    const show = (o, on) => { if (o.shown !== on) { o.shown = on; o.g.style.display = on ? '' : 'none'; } };
+    function ringState(k, sg, p) {
+      const { kind, i } = sg;
+      let f = 0, a = 0;
+      if (kind === 'exit' && sg.page.cover) { if (k === 0) { f = smooth(clamp01(p / 0.45)); a = 1; } }
+      else if (kind === 'fly' && i === k) { f = M.cover && k === 0 ? 1 : smooth(clamp01((p - 0.42) / 0.45)); a = 1; }
+      else if (i === k && (kind === 'hold' || kind === 'enter' || kind === 'exit')) { f = 1; a = 1; }
+      else if (kind === 'fly' && i === k + 1) { f = 1; a = 1 - smooth(clamp01(p / 0.3)); }
+      // the general arrangement marks every detail before the last dive
+      if (shots[i] && shots[i].keyplan && k < i) {
+        const kp = kind === 'fly' ? smooth(clamp01((p - 0.5) / 0.35)) : kind === 'hold' || kind === 'enter' ? 1 : 0;
+        if (kp > 0) { f = kp; a = 1; }
+      }
+      return { f, a };
+    }
+    function pencil(v, sg, p) {
+      const { W } = M, toS = (x, y) => [(x - v.x) * v.s + W / 2, (y - v.y) * v.s + M.H / 2];
+      rings.forEach((rg) => {
+        const { f, a } = ringState(rg.k, sg, p);
+        show(rg, f > 0.001 && a > 0.001);
+        if (!rg.shown) return;
+        const [cx, cy] = toS(rg.sh.ring[0], rg.sh.ring[1]), R = rg.sh.ring[2] * v.s;
+        rg.arc.setAttribute('d', arcPath(cx, cy, R, f));
+        rg.g.style.opacity = a.toFixed(3);
+        const ba = Math.PI * (rg.sh.ring[3] || 0.75), bOn = f > 0.32;
+        rg.bub.setAttribute('transform', `translate(${(cx + R * Math.cos(ba)).toFixed(1)} ${(cy + R * Math.sin(ba)).toFixed(1)})`);
+        rg.bub.style.opacity = bOn ? 1 : 0;
+        if (rg.sketch) { // the span still to be built, sketched in pencil off the end of the deck
+          rg.sketch.setAttribute('d', rg.sh.sketch.map(([x1, y1, x2, y2]) => { const [a1, b1] = toS(x1, y1), [a2, b2] = toS(x2, y2); return `M${a1.toFixed(1)} ${b1.toFixed(1)}L${a2.toFixed(1)} ${b2.toFixed(1)}`; }).join(''));
+          rg.sketch.style.opacity = smooth(clamp01((f - 0.2) / 0.6)).toFixed(3);
+        }
+      });
+      notes.forEach((list, k) => {
+        const { kind, i } = sg;
+        let a = 0, d = 1;
+        if (kind === 'fly' && i === k) { a = clamp01((p - 0.8) / 0.2); d = a; }
+        else if (i === k && (kind === 'hold' || kind === 'enter')) a = 1;
+        else if (i === k && kind === 'exit' && !sg.page.cover) { a = clamp01((p - 0.7) / 0.3); d = a; }
+        else if (kind === 'fly' && i === k + 1) a = 1 - clamp01(p / 0.22);
+        list.forEach((nt) => {
+          show(nt, a > 0.001);
+          if (!nt.shown) return;
+          let [x, y] = toS(nt.at[0], nt.at[1]);
+          if (nt.n.hfl) x = clamp(x, 40, W - 64); // a water level holds anywhere along the water line
+          placeNote(nt, x);
+          nt.g.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
+          nt.g.style.opacity = a.toFixed(3);
+          if (nt.lead) nt.lead.style.strokeDashoffset = (1 - d).toFixed(3);
+        });
+      });
+    }
+
+    // portholes: each sheet is clipped to a circle on its callout while it opens or closes
+    function sheetState(pg, Y) {
+      if (Y < pg.es) return ['shut', 0];
+      if (Y < pg.ee) return ['enter', (Y - pg.es) / (pg.ee - pg.es)];
+      if (Y < pg.xs) return ['open', 0];
+      if (Y < pg.xe) return ['exit', (Y - pg.xs) / (pg.xe - pg.xs)];
+      return ['shut', 0];
+    }
+    function setSheet(pg, state, clip, op) {
+      if (pg.state !== state) {
+        pg.state = state;
+        pg.el.style.willChange = state === 'enter' || state === 'exit' ? 'transform' : ''; // its own layer while the circle moves
+        pg.el.classList.toggle('cam-shut', state === 'shut');
+      }
+      if (clip !== pg.clip) { pg.clip = clip; pg.el.style.clipPath = clip; }
+      if (op !== pg.op) { pg.op = op; pg.el.style.opacity = op; }
+    }
+    function portholes(v, Y) {
+      const { W, H } = M;
+      let rimOn = false;
+      M.pages.forEach((pg) => {
+        const [state, p] = sheetState(pg, Y);
+        if (state === 'open') { setSheet(pg, state, '', ''); return; }
+        if (state === 'shut') { setSheet(pg, state, 'circle(0px at 0px 0px)', ''); return; }
+        const [rx, ry, rr] = shots[pg.k].ring;
+        const cx = (rx - v.x) * v.s + W / 2, cy = (ry - v.y) * v.s + H / 2, R = rr * v.s;
+        const far = Math.hypot(Math.max(cx, W - cx), Math.max(cy, H - cy)) + 6;
+        let r, op = 1;
+        if (state === 'enter') r = p < 0.28 ? R * smooth(p / 0.28) : R + (far - R) * Math.pow((p - 0.28) / 0.72, 1.7);
+        else { r = p < 0.72 ? far + (R - far) * (1 - Math.pow(1 - p / 0.72, 2)) : R; op = 1 - smooth(clamp01((p - 0.72) / 0.28)); }
+        r = Math.max(0, r);
+        setSheet(pg, state, `circle(${r.toFixed(1)}px at ${(cx - pg.left).toFixed(1)}px ${(cy - (pg.top - Y)).toFixed(1)}px)`, op < 0.999 ? op.toFixed(3) : '');
+        if (r > 0.5 && r < far - 1) {
+          rimOn = true;
+          rim.setAttribute('cx', cx.toFixed(1)); rim.setAttribute('cy', cy.toFixed(1)); rim.setAttribute('r', r.toFixed(1));
+          shades.forEach((sd) => { sd.c.setAttribute('cx', cx.toFixed(1)); sd.c.setAttribute('cy', cy.toFixed(1)); sd.c.setAttribute('r', (r + sd.off).toFixed(1)); });
+          edge.style.opacity = op < 0.999 ? op.toFixed(3) : '';
+        }
+      });
+      if (edge.style.display !== (rimOn ? '' : 'none')) edge.style.display = rimOn ? '' : 'none';
+    }
+
+    function update(force) {
+      if (doc.classList.contains('play-mode') || !M) return;
+      const Y = scrollY;
+      const rest = Y >= M.coverAt;
+      if (rest !== hiddenRig) { hiddenRig = rest; layer.style.visibility = rest ? 'hidden' : ''; }
+      const segs = M.segs;
+      let sg = segs[segs.length - 1];
+      for (let i = 0; i < segs.length; i++) if (Y < segs[i].y1) { sg = segs[i]; break; }
+      const p = clamp01((Y - sg.y0) / Math.max(1, sg.y1 - sg.y0));
+      const v = sg.kind === 'fly' ? sg.path(ease(p)) : mixV(sg.a, sg.b, smooth(p));
+      portholes(v, Y);
+      if (rest && !force) return;
+      // the camera leans into a move, as if swooping low over the sheet
+      let tilt = 'none';
+      if (sg.kind === 'fly') {
+        const amp = Math.sin(Math.PI * p) * 5, dx = sg.to.x - sg.from.x, dy = sg.to.y - sg.from.y, n = Math.hypot(dx, dy) || 1;
+        if (amp > 0.04) tilt = `perspective(1500px) rotateX(${(dy / n * amp).toFixed(2)}deg) rotateY(${(-dx / n * amp).toFixed(2)}deg)`;
+      }
+      if (tilt !== lastTilt) { rig.style.transform = tilt; lastTilt = tilt; }
+      draw(v, force, tilt === 'none' ? 0 : 0.07);
+      pencil(v, sg, p);
+      shots.forEach((sh, i) => { const on = Y >= M.capAt[i]; if (sh.capOn !== on) { sh.capOn = on; sh.cap.classList.toggle('on', on); } });
+    }
+    function refresh() { measure(); update(true); }
+    let roPending = 0;
+    if ('ResizeObserver' in window) new ResizeObserver(() => { if (!roPending) roPending = requestAnimationFrame(() => { roPending = 0; refresh(); }); }).observe($('main'));
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(refresh, () => {});
+    measure();
+    return { update, refresh };
+  });
+  if (camera) { art.style.removeProperty('--sun-y'); fitArt(); }
   if (!motion && spans) { spans.style.setProperty('--deck', 1); pierItems.forEach((li) => li.classList.add('on')); }
   onScroll();
 
@@ -2468,7 +2941,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       }
     }
     art.addEventListener('pointerdown', (e) => {
-      if (!doc.classList.contains('intro-done')) return;
+      if (!doc.classList.contains('intro-done') || doc.classList.contains('off-cover')) return;
       const m = art.getScreenCTM(); if (!m) return;
       const pt = new DOMPoint(e.clientX, e.clientY).matrixTransform(m.inverse());
       const y = pt.y - sunY();
@@ -2489,7 +2962,6 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
   }
 
   /* ---------- the cables are a harp: sweep across them to play ---------- */
-  let harp = null;
   function setupHarp() {
     if (!art || harp) return;
     const onSun = new Map($$('.on-sun path.cable:not(.back)', art).map((p) => [p.getAttribute('d'), p]));
@@ -2553,6 +3025,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
     };
     function track(e) {
       if (!doc.classList.contains('intro-done')) return;
+      if (doc.classList.contains('off-cover')) { pts.delete(e.pointerId); return; }
       const r = art.getBoundingClientRect();
       if (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) { pts.delete(e.pointerId); return; }
       const m = art.getScreenCTM();
@@ -2602,7 +3075,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
     function schedule() { clearTimeout(demoTimer); if (played < 4 && demos < 3) demoTimer = setTimeout(demo, 14000); }
     function demo() {
       const r = art.getBoundingClientRect();
-      if (played >= 4 || !motion || document.hidden || doc.classList.contains('play-mode') || r.bottom < 0 || r.top > innerHeight) { schedule(); return; }
+      if (played >= 4 || !motion || document.hidden || doc.classList.contains('play-mode') || doc.classList.contains('off-cover') || r.bottom < 0 || r.top > innerHeight) { schedule(); return; }
       demos++;
       strs.filter((s) => s.x1 < 1412).sort((a, b) => a.x1 - b.x1)
         .forEach((s, i) => setTimeout(() => pluck(s, 0.35, true, false, true), i * 55));
@@ -2815,7 +3288,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       let i = 0;
       const tick = () => {
         if (sess !== S) return;
-        if (!sound.on) { stopSong(); return; }
+        if (!sound.on || !sound.zone) { stopSong(0.5); return; }
         const now = sound.music.now(), lag = sound.music.lag();
         while (i < ev.length && S.t0 + ev[i].t < now + 0.16) {
           const e = ev[i++], when = S.t0 + e.t;
@@ -2836,7 +3309,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
     document.addEventListener('visibilitychange', () => { if (document.hidden && current) stopSong(); });
     syncTuneUI();
     doc.classList.add('harp-ready');
-    harp = { toggle: playSong, stop: () => stopSong(), get playing() { return !!current; }, pluckEl: (el, speed, quiet, touch) => { const s = byEl.get(el); if (s) pluck(s, speed, quiet, touch); } };
+    harp = { toggle: playSong, stop: (fade) => stopSong(fade), get playing() { return !!current; }, pluckEl: (el, speed, quiet, touch) => { const s = byEl.get(el); if (s) pluck(s, speed, quiet, touch); } };
   }
 
   /* ---------- load test: drive a 400 kN truck along the cover bridge ---------- */
@@ -2920,7 +3393,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
     let lastType = 'mouse';
     function track(e) {
       if (!doc.classList.contains('intro-done')) return;
-      if (doc.classList.contains('play-mode')) { setActive(false); return; }
+      if (doc.classList.contains('play-mode') || doc.classList.contains('off-cover')) { setActive(false); return; }
       lastType = e.pointerType || 'mouse';
       const r = art.getBoundingClientRect();
       const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
@@ -2938,6 +3411,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
     addEventListener('pointermove', track, { passive: true });
     addEventListener('pointerdown', track, { passive: true });
     document.addEventListener('mouseout', (e) => { if (!e.relatedTarget) setActive(false); });
+    document.addEventListener('sb:offcover', () => setActive(false));
   }
 
   /* ---------- play mode: the cover bridge as a full-screen harp ---------- */
@@ -2984,9 +3458,14 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
     if (harp.playing) { harp.stop(); return; }
     const go = () => {
       const r = art.getBoundingClientRect();
-      const inView = r.bottom > 80 && r.top < innerHeight - 80;
-      if (!inView && !doc.classList.contains('play-mode')) { scrollToTarget($('#top')); setTimeout(() => harp.toggle(), 1100); }
-      else harp.toggle();
+      // music lives on the cover: from anywhere else, go back up to it and play there
+      const inView = r.bottom > 80 && r.top < innerHeight - 80 && !doc.classList.contains('off-cover');
+      if (!inView && !doc.classList.contains('play-mode')) {
+        // a frame later, so the key press that asked for the tune doesn't cancel the scroll it starts
+        const wait = clamp(scrollY / 2.4, 650, 1500) + 180;
+        requestAnimationFrame(() => scrollToTarget($('#top')));
+        setTimeout(() => harp.toggle(), wait);
+      } else harp.toggle();
     };
     sound.ready().then(go, go);
   }
@@ -3166,7 +3645,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       else if (e.key === 'b' || e.key === 'B') {
         const btn = $('.nav .theme-toggle').getBoundingClientRect();
         setTheme(currentTheme() === 'dark' ? 'light' : 'dark', btn.left + btn.width / 2, Math.max(20, btn.top + btn.height / 2));
-      } else if (e.key === 's' || e.key === 'S') sound.toggle();
+      } else if ((e.key === 's' || e.key === 'S') && sound.zone) sound.toggle();
       else if (e.key === 'p' || e.key === 'P') playTune();
       else if ((e.key === 'd' || e.key === 'D') && drum) drum.center(0.95, true);
       else if (/^[1-5]$/.test(e.key)) {

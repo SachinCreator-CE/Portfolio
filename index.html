@@ -264,7 +264,8 @@ html.menu-open body{overflow:hidden}
 .cut b::after{content:"";position:absolute;left:50%;top:-8px;width:8px;height:6px;margin-left:-4px;background:var(--ink);clip-path:polygon(50% 0,100% 100%,0 100%)}
 .plate-img.lens-on ~ .cuts .cut b{background:var(--ink);color:var(--paper)}
 @media (min-width:900px){.about-grid .plate{position:sticky;top:104px;width:min(100%,400px,calc((100vh - 236px) * 760 / 1260))}}
-.plate-scan{position:absolute;left:0;right:0;top:0;height:1px;background:var(--scan);box-shadow:0 0 14px 2px var(--scan);opacity:0;pointer-events:none}
+.plate-scan{position:absolute;left:0;right:0;top:0;height:100%;opacity:0;pointer-events:none}
+.plate-scan::before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:var(--scan);box-shadow:0 0 14px 2px var(--scan)}
 .plate .cm{position:absolute;width:14px;height:14px;border:0 solid var(--ink)}
 .plate .cm.tl{left:-22px;top:-22px;border-right-width:1px;border-bottom-width:1px}
 .plate .cm.tr{right:-22px;top:-22px;border-left-width:1px;border-bottom-width:1px}
@@ -403,31 +404,35 @@ html.menu-open body{overflow:hidden}
 .cs-svg .car .ln{stroke-width:1.1}
 .cs-actions{display:none;align-items:center;gap:18px}
 .cs.live .cs-actions{display:inline-flex}
-.cs-hold{position:relative;overflow:hidden;display:inline-flex;align-items:center;min-height:44px;padding:0 20px;border:1px solid var(--ink);background:transparent;color:var(--ink);font:500 14px/1 var(--font-text);letter-spacing:0;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none}
+.cs-hold{position:relative;display:inline-flex;align-items:center;min-height:44px;padding:0 20px;border:1px solid var(--ink);background:transparent;color:var(--ink);font:500 14px/1 var(--font-text);letter-spacing:0;cursor:pointer;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:none}
 .cs-hold .ch-fill{position:absolute;inset:0;background:var(--ink);opacity:.16;transform-origin:left;transform:scaleX(var(--p,0))}
 .cs-hold .ch-label{position:relative;font-variant-numeric:tabular-nums}
 .cs-hold:disabled{opacity:.4;cursor:default}
-.cs.ready:not(.closed) .cs-hold:not(:active){animation:holdCall 2.6s ease-in-out infinite}
-@keyframes holdCall{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--ink) 12%,transparent)}}
+.cs-hold::after{content:"";position:absolute;inset:-7px;border:6px solid color-mix(in srgb,var(--ink) 12%,transparent);opacity:0;pointer-events:none}
+.cs.ready:not(.closed) .cs-hold:not(:active)::after{animation:holdCall 2.6s ease-in-out infinite}
+@keyframes holdCall{0%,100%{opacity:0}50%{opacity:1}}
 .cs.closed .cs-hold:disabled{opacity:1;border-color:var(--pencil);color:var(--pencil)}
 .cs-again{display:inline-flex;align-items:center;min-height:44px;padding:0 2px;border:0;background:none;color:var(--ink);font:400 15px/1 var(--font-display);font-style:italic;text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--rule-strong);cursor:pointer}
 .cs-stamp{position:absolute;left:50%;top:2.5%;display:grid;justify-items:center;gap:5px;padding:11px 18px 10px;border:2px solid var(--pencil);outline:1px solid var(--pencil);outline-offset:3px;color:var(--pencil);background:color-mix(in srgb,var(--paper) 84%,transparent);transform:translateX(-50%) rotate(-6deg);pointer-events:none}
 .sp-k{font:600 13px/1 var(--font-tech);letter-spacing:.24em;text-transform:uppercase}
 .sp-v{font:italic 400 18px/1.05 var(--font-display)}
 .sp-d{font:500 10.5px/1 var(--font-tech);letter-spacing:var(--lbl-track);text-transform:uppercase}
-@media (prefers-reduced-motion:reduce){.cs.ready:not(.closed) .cs-hold{animation:none}}
+@media (prefers-reduced-motion:reduce){.cs.ready:not(.closed) .cs-hold::after{animation:none}}
 /* the instrument lives on the cover: below it the sound switch steps aside */
 .nav .sound-toggle,.menu-foot .sound-toggle{transition:opacity .35s ease,visibility 0s}
 .off-cover .nav .sound-toggle,.off-cover .menu-foot .sound-toggle{opacity:0;visibility:hidden;pointer-events:none;transition:opacity .35s ease,visibility 0s .35s}
-.off-cover .sb-bars i{animation:none}
+:root.off-cover .sb-bars i{animation:none}
 /* experiment: the cover bridge pinned behind the page as a camera rig */
 [data-camera] body{background-image:none}
 [data-camera] .cam-layer{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;contain:strict}
-[data-camera] .cam-layer .art{position:absolute;max-width:none;margin:0;overflow:hidden;pointer-events:auto;will-change:transform}
+[data-camera] .cam-art{position:absolute;will-change:transform}
+[data-camera] .cam-layer .art{position:absolute;left:0;top:0;width:100%;height:100%;max-width:none;margin:0;overflow:hidden;pointer-events:auto}
 [data-camera].off-cover .cam-layer .art{pointer-events:none}
 [data-camera].play-mode .art{transform:none!important}
 [data-camera] .cam-layer .harp-note,[data-camera] .cam-layer .lt-hint,[data-camera] .cam-layer .lt{transition:opacity .4s ease}
-[data-camera].off-cover .cam-layer .harp-note,[data-camera].off-cover .cam-layer .lt-hint,[data-camera].off-cover .cam-layer .lt{opacity:0!important}
+[data-camera].cam-away .cam-layer .harp-note,[data-camera].cam-away .cam-layer .lt-hint,[data-camera].cam-away .cam-layer .lt{transition-duration:.2s}
+[data-camera].off-cover .cam-layer .harp-note,[data-camera].off-cover .cam-layer .lt-hint,[data-camera].off-cover .cam-layer .lt,[data-camera].cam-away .cam-layer .harp-note,[data-camera].cam-away .cam-layer .lt-hint,[data-camera].cam-away .cam-layer .lt{opacity:0!important}
+[data-camera].cover-far:not(.play-mode) .cam-layer .harp-note,[data-camera].cover-far:not(.play-mode) .cam-layer .lt-hint,[data-camera].cover-far:not(.play-mode) .cam-layer .lt,[data-camera]:not(.play-mode) .art text.cam-off{display:none}
 /* off the cover the sun is no longer a drum: it goes out and stays as a drawn circle */
 [data-camera] .art .sun{stroke:var(--ink);stroke-width:1.1;stroke-opacity:0;transition:fill-opacity .9s ease,stroke-opacity .9s ease}
 [data-camera].off-cover .art .sun{fill-opacity:0;stroke-opacity:.75}
@@ -445,7 +450,7 @@ html.menu-open body{overflow:hidden}
 [data-camera] .sheet,[data-camera] .hero .stage{isolation:isolate}
 [data-camera] .sheet::before{content:"";position:absolute;z-index:-1;top:calc(-1 * var(--cam-ext,100vh));bottom:calc(-1 * var(--cam-ext,100vh));left:calc(50% - 50vw);width:100vw;pointer-events:none;
   background-color:color-mix(in srgb,var(--paper) 93%,transparent);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:32px 32px;background-position:var(--gx,-1px) var(--gy,-1px)}
-[data-camera] .sheet.contact::before{background-color:var(--paper)}
+[data-camera] .sheet.contact::before{background-color:var(--paper);bottom:0} /* the last sheet's paper reaches up for its porthole, never below the page */
 [data-camera] .contact{overflow:visible} /* its paper has to reach past its top; the page itself still clips sideways */
 [data-camera] .site-foot::before{content:"";position:absolute;z-index:-1;top:0;bottom:0;left:calc(50% - 50vw);width:100vw;pointer-events:none;
   background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:32px 32px;background-position:var(--gx,-1px) var(--gy,-1px)}
@@ -465,6 +470,11 @@ html.menu-open body{overflow:hidden}
 [data-camera] .cam-edge .ce-rim{stroke:var(--ink);stroke-width:1.3}
 [data-camera] .cam-edge .ce-shade{stroke:var(--shade)}
 [data-camera].play-mode .cam-edge{display:none}
+@media (hover:none),(pointer:coarse){
+  .nav.scrolled{-webkit-backdrop-filter:none;backdrop-filter:none;background-color:color-mix(in srgb,var(--paper) 96%,transparent)}
+  .play-btn,.sheet-bar{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+  .sheet-bar{background:color-mix(in srgb,var(--paper) 97%,transparent)!important}
+}
 /* touch screens: the paper and its porthole sit in the fixed layer with the drawing; the sheets carry only their grid
    and their words, which fade in once the paper has opened and out before it closes */
 [data-camera][data-touch] .cam-layer{bottom:auto;height:100vh;height:100lvh}
@@ -544,7 +554,7 @@ html.menu-open body{overflow:hidden}
 .foot-meta{display:flex;justify-content:space-between;gap:16px;margin-top:14px;font:400 12.5px/1.5 var(--font-text);color:var(--graphite)}
 
 /* sheet indicator on the frame */
-.sheet-tag{position:fixed;z-index:65;right:calc(var(--frame) + 44px);bottom:calc(var(--frame) - 12px);height:24px;display:flex;align-items:center;gap:12px;padding:0 11px;
+.sheet-tag{position:fixed;z-index:65;contain:layout paint;right:calc(var(--frame) + 44px);bottom:calc(var(--frame) - 12px);height:24px;display:flex;align-items:center;gap:12px;padding:0 11px;
   background:var(--paper);border:1px solid var(--rule-strong);font:500 var(--lbl)/1 var(--font-tech);letter-spacing:var(--lbl-track);text-transform:uppercase;color:var(--ink);white-space:nowrap}
 .sheet-tag .st-sep{width:1px;height:10px;background:var(--rule-strong)}
 .sheet-tag [data-st-name]{display:inline-block;min-width:8ch;transition:opacity .3s ease,transform .45s var(--ease-out)}
@@ -641,15 +651,16 @@ html.has-cursor,html.has-cursor *{cursor:none!important}
 /* sound */
 .sound-toggle{appearance:none;border:0;background:none;color:var(--ink);cursor:pointer;padding:0;display:inline-flex;align-items:center;gap:9px;min-height:44px;font:450 14.5px/1 var(--font-text)}
 .sb-bars{display:inline-flex;align-items:center;gap:2px;width:15px;height:15px}
-.sb-bars i{width:2px;height:3px;background:currentColor;border-radius:1px}
+.sb-bars i{width:2px;height:14px;background:currentColor;border-radius:1px;transform:scaleY(.2143)}
 .sound-on .sb-bars i{animation:bars 1.1s ease-in-out infinite}
 .sound-on .sb-bars i:nth-child(2){animation-delay:-.35s}
 .sound-on .sb-bars i:nth-child(3){animation-delay:-.7s}
 .sound-on .sb-bars i:nth-child(4){animation-delay:-.2s}
-@keyframes bars{0%,100%{height:3px}50%{height:14px}}
+@keyframes bars{0%,100%{transform:scaleY(.2143)}50%{transform:scaleY(1)}}
 
 /* headline lean while scrolling */
-.display,.bc-text{transform:skewY(var(--skew,0deg));transform-origin:0 50%}
+.display,.bc-text{transform:skewY(0deg);transform-origin:0 50%}
+@media (hover:hover) and (pointer:fine){.motion .display,.motion .bc-text{will-change:transform}}
 
 /* legend (keyboard) */
 .legend{position:fixed;z-index:80;left:calc(var(--frame) + 28px);bottom:calc(var(--frame) + 28px);width:290px;padding:16px 18px 18px;background:var(--paper);border:1px solid var(--rule-strong);color:var(--ink);opacity:0;transform:translateY(10px);transition:opacity .35s ease,transform .5s var(--ease-out)}
@@ -733,7 +744,8 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
 .sc-tab b{font-weight:500;color:var(--pencil)}
 .sc-pre{margin:0;white-space:pre;font:500 9.5px/1.5 var(--font-tech);color:var(--ink)}
 .sc-pre code{font:inherit}
-.sc-caret{display:inline-block;width:5px;height:10px;margin-left:1px;vertical-align:-1px;background:var(--pencil);animation:caret 1s steps(1) infinite}
+.sc-caret{display:inline-block;width:5px;height:10px;margin-left:1px;vertical-align:-1px;background:var(--pencil);animation:caret 1s steps(1) infinite;animation-play-state:paused}
+.sc-caret.live{animation-play-state:running}
 @keyframes caret{50%{opacity:0}}
 .chips li{transition:background-color .3s ease,color .3s ease,border-color .3s ease}
 .chips li.on{background:var(--ink);border-color:var(--ink);color:var(--paper)}
@@ -805,7 +817,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
 .motion .plate .plate-img img{clip-path:inset(0 0 100% 0);transform:scale(1.08);transition:clip-path 1.8s var(--ease-io),transform 2.4s var(--ease-out)}
 .motion .plate.in .plate-img img{clip-path:inset(0 0 0 0);transform:none}
 .motion .plate.in .plate-scan{animation:scan 1.8s var(--ease-io) forwards}
-@keyframes scan{0%{top:0;opacity:1}88%{opacity:1}100%{top:100%;opacity:0}}
+@keyframes scan{0%{transform:translateY(0);opacity:1}88%{opacity:1}100%{transform:translateY(100%);opacity:0}}
 .motion .plate .cm{opacity:0;transform:scale(.4);transition:opacity .6s ease .9s,transform .9s var(--ease-out) .9s}
 .motion .plate.in .cm{opacity:1;transform:none}
 .motion .plate .cuts,.motion .plate .plate-note{opacity:0;transition:opacity .8s ease 1.3s}
@@ -958,7 +970,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
   .schedule>div{grid-template-columns:92px minmax(0,1fr)}
 }
 @media (prefers-reduced-motion:reduce){
-  .sound-on .sb-bars i{height:9px}
+  .sound-on .sb-bars i{transform:scaleY(.643)}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;transition-delay:0ms!important}
 }
 </style>
@@ -1155,7 +1167,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
         <p class="plate-note" aria-hidden="true"><span class="pn-k">Note 1 · Section A–A</span><span class="pn-t">There’s a photograph under this drawing.</span><span class="pn-t pn-t2"><span class="ph-fine">Move across the portrait to cut through it.</span><span class="ph-touch">Drag across the portrait to cut through it.</span></span></p>
         <div class="plate-frame">
         <div class="plate-img">
-          <img src="portrait.webp" width="760" height="1554" loading="lazy" decoding="async" alt="Illustrated portrait of Sachin Balakrishna in a blue shirt and white mundu, arms folded, smiling, set against architectural drawing lines. Moving over it reveals a photo of him in a black suit.">
+          <img src="portrait.webp?v=3" width="841" height="1720" loading="lazy" decoding="async" alt="Illustrated portrait of Sachin Balakrishna in a blue shirt and white mundu, arms folded, smiling, set against architectural drawing lines. Moving over it reveals a photo of him in a black suit.">
           <span class="plate-alt" aria-hidden="true"><img src="portrait-suit.webp?v=2" width="760" height="1260" loading="lazy" decoding="async" alt=""></span>
           <span class="lens-ring" aria-hidden="true"><i>A–A</i></span>
           <span class="plate-scan" aria-hidden="true"></span>
@@ -1421,6 +1433,39 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
   const $$ = (s, c = document) => Array.from(c.querySelectorAll(s));
   const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
   const lerp = (a, b, t) => a + (b - a) * t;
+  // easing rates tuned per 60 Hz frame, turned into rates per unit of time: the same motion at 60, 90, 120 or 144 Hz
+  const perFrame = (k, dt) => 1 - Math.pow(1 - k, Math.min(4, dt / 16.67));
+  // one frame callback for the whole page, in three lanes: what moves the scroll goes first, then what reads the page,
+  // then everything that only draws. A frame never has to work out style or layout twice, at 60, 90, 120 or 144 Hz
+  const frames = (() => {
+    const lanes = [new Map(), new Map(), new Map()];
+    let id = 0, pending = 0, lane = -1, fy = NaN;
+    function run(now) {
+      pending = 0;
+      for (lane = 0; lane < 3; lane++) {
+        if (lane === 1) fy = NaN;
+        const jobs = lanes[lane];
+        lanes[lane] = new Map();
+        jobs.forEach((fn) => { try { fn(now); } catch (err) { console.warn(err); } });
+      }
+      lane = -1; fy = NaN;
+      if (!pending && lanes.some((m) => m.size)) pending = window.requestAnimationFrame(run);
+    }
+    function request(fn, l) {
+      const h = ++id;
+      lanes[l].set(h, fn);
+      if ((lane < 0 || l <= lane) && !pending) pending = window.requestAnimationFrame(run); // a later lane of this frame needs no new frame
+      return h;
+    }
+    return {
+      request,
+      cancel(h) { if (h) lanes.forEach((m) => m.delete(h)); },
+      // where the page is scrolled to, read once a frame once the scroll has moved, so asking again costs nothing
+      y() { return lane >= 1 ? (fy === fy ? fy : (fy = scrollY)) : scrollY; }
+    };
+  })();
+  const requestAnimationFrame = (fn) => frames.request(fn, 2);
+  const cancelAnimationFrame = (h) => frames.cancel(h);
   const SVGNS = 'http://www.w3.org/2000/svg';
   const EASE_OUT = 'cubic-bezier(.16,1,.3,1)';
   const EASE_IO = 'cubic-bezier(.65,0,.35,1)';
@@ -1614,12 +1659,16 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
     let target = scrollY, current = scrollY, running = false, last = 0;
     const max = () => Math.max(0, document.documentElement.scrollHeight - innerHeight);
     function frame(now) {
+      if (!running) { last = 0; return; }
+      // the page was scrolled some other way (keys, the scrollbar): let that win
+      if (Math.abs(scrollY - current) > 3) { running = false; last = 0; return; }
       const dt = last ? Math.min(64, now - last) : 16.7;
       last = now;
       current += (target - current) * (1 - Math.pow(1 - 0.11, dt / 16.7));
       if (Math.abs(target - current) < 0.4) { current = target; running = false; }
       scrollTo(0, current);
-      if (running) requestAnimationFrame(frame); else last = 0;
+      requestTick(); // everything that follows the scroll draws in this same frame
+      if (running) frames.request(frame, 0); else last = 0;
     }
     addEventListener('wheel', (e) => {
       if (e.ctrlKey || doc.classList.contains('menu-open') || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
@@ -1627,9 +1676,8 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       const unit = e.deltaMode === 1 ? 32 : e.deltaMode === 2 ? innerHeight : 1;
       if (!running) { current = scrollY; target = scrollY; }
       target = clamp(target + e.deltaY * unit, 0, max());
-      if (!running) { running = true; requestAnimationFrame(frame); }
+      if (!running) { running = true; frames.request(frame, 0); }
     }, { passive: false });
-    addEventListener('scroll', () => { if (running && Math.abs(scrollY - current) > 3) running = false; }, { passive: true });
     return { stop() { running = false; } };
   })();
 
@@ -1747,9 +1795,10 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
     const step = (now) => {
       const p = clamp((now - t0) / dur, 0, 1);
       scrollTo(0, y0 + dy * ease(p));
-      if (p < 1) scrollAnim = requestAnimationFrame(step); else { scrollAnim = 0; focus(); }
+      requestTick();
+      if (p < 1) scrollAnim = frames.request(step, 0); else { scrollAnim = 0; focus(); }
     };
-    scrollAnim = requestAnimationFrame(step);
+    scrollAnim = frames.request(step, 0);
   }
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a[href^="#"]');
@@ -1982,17 +2031,27 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
     });
   });
 
+  // the code sample's caret blinks only while it can be seen
+  safe(() => {
+    const caret = $('.sc-caret');
+    if (!caret) return;
+    if (!('IntersectionObserver' in window)) { caret.classList.add('live'); return; }
+    new IntersectionObserver(([en]) => caret.classList.toggle('live', en.isIntersecting)).observe(caret);
+  });
+
   /* ---------- section A-A: a lens over the portrait shows the photograph under the drawing ---------- */
   safe(() => {
     const box = $('[data-lens] .plate-img');
     if (!box) return;
-    let raf = 0, tx = 50, ty = 30, cx = 50, cy = 30, on = false, hideT = 0, used = false;
-    const k = motion ? 0.22 : 1;
-    function step() {
+    let raf = 0, tx = 50, ty = 30, cx = 50, cy = 30, on = false, hideT = 0, used = false, last = 0;
+    function step(now) {
+      const dt = last ? now - last : 16.67; last = now;
+      const k = motion ? perFrame(0.22, dt) : 1;
       cx += (tx - cx) * k; cy += (ty - cy) * k;
       box.style.setProperty('--lx', cx.toFixed(2) + '%');
       box.style.setProperty('--ly', cy.toFixed(2) + '%');
       raf = (Math.abs(tx - cx) > 0.05 || Math.abs(ty - cy) > 0.05) ? requestAnimationFrame(step) : 0;
+      if (!raf) last = 0;
     }
     function move(e) {
       if (!used) { used = true; ghost.stop(); }
@@ -2094,10 +2153,15 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
         p.blocks.forEach((bk) => { bk.style.opacity = both || i === 0 ? '' : '0'; });
       });
     }
+    let drawnProg = NaN;
     function update(prog) {
       lastProg = prog;
       if (closed) return;
-      const f = clamp(prog, 0, 1) * N;
+      // far above or below the figure nothing moves: leave the drawing alone rather than redraw it every frame
+      const pc = clamp(prog, 0, 1);
+      if (pc === drawnProg && lastN >= 0) return;
+      drawnProg = pc;
+      const f = pc * N;
       const n = Math.min(N, Math.floor(f));
       const frac = n >= N ? 0 : f - n;
       if (n !== lastN) {
@@ -2267,12 +2331,15 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       wrap.dataset.top = String(top);
       wrap.style.height = (sh + Math.round(vh * 1.5)) + 'px';
     }
-    function update() {
+    const RG = {};
+    function measure(y) { RG.top = wrap.getBoundingClientRect().top + y; RG.run = Math.max(1, wrap.offsetHeight - stage.offsetHeight); RG.w = spans.clientWidth; }
+    function update(y) {
       if (!active) return false;
-      const r = wrap.getBoundingClientRect(), top = +wrap.dataset.top;
-      const p = clamp((top - r.top) / Math.max(1, wrap.offsetHeight - stage.offsetHeight), 0, 1);
+      if (RG.top === undefined) measure(scrollY);
+      const top = +wrap.dataset.top;
+      const p = clamp((top - (RG.top - y)) / RG.run, 0, 1);
       const f = clamp((p - 0.05) / 0.8, 0, 1);
-      spans.style.setProperty('--tx', (f * spans.clientWidth * 0.66667).toFixed(1) + 'px');
+      spans.style.setProperty('--tx', (f * RG.w * 0.66667).toFixed(1) + 'px');
       spans.style.setProperty('--deck', f.toFixed(4));
       spans.style.setProperty('--next', f >= 0.999 ? 1 : 0.35);
       pierItems.forEach((li, i) => li.classList.toggle('on', p > 0.02 && f >= i / 2 - 0.001));
@@ -2284,7 +2351,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
     }
     layout();
     addEventListener('resize', () => { layout(); if (typeof requestTick === 'function') requestTick(); }, { passive: true });
-    return { update };
+    return { update, measure };
   })();
   const leadEl = $('.prose .lead');
   let leadWords = null, lastLit = -1;
@@ -2299,25 +2366,53 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
     leadWords = $$('.w', leadEl);
   });
   if (sheetBar) sheetBar.addEventListener('click', openMenu);
-  let lastT = performance.now(), skewT = 0, skewC = 0, skewRaf = 0;
+  let lastT = performance.now(), skewT = 0, skewC = 0, skewRaf = 0, skewLast = 0;
   const skewEls = $$('.display, .bc-text');
-  function skewLoop() {
-    skewT *= 0.86;
-    skewC += (skewT - skewC) * 0.16;
+  function skewLoop(now) {
+    const dt = skewLast ? Math.min(50, now - skewLast) : 16.67; skewLast = now;
+    skewT *= Math.pow(0.86, dt / 16.67);
+    skewC += (skewT - skewC) * perFrame(0.16, dt);
     const settled = Math.abs(skewT) < 0.004 && Math.abs(skewC) < 0.004;
-    skewEls.forEach((el) => (settled ? el.style.removeProperty('--skew') : el.style.setProperty('--skew', skewC.toFixed(3) + 'deg')));
+    const tf = settled ? '' : `skewY(${skewC.toFixed(3)}deg)`; // straight onto the transform: the compositor moves the type, nothing repaints
+    skewEls.forEach((el) => { el.style.transform = tf; });
     skewRaf = settled ? 0 : requestAnimationFrame(skewLoop);
+    if (settled) skewLast = 0;
   }
+
+  // where things sit on the page, measured once whenever the layout changes; scrolling then only does arithmetic,
+  // so a frame never stops to re-measure the page (one layout per frame at 60, 90 or 120 Hz)
+  const G = { dirty: true };
+  const footEl = $('.site-foot');
+  function measureGeo() {
+    const y = frames.y(), top = (el) => (el ? el.getBoundingClientRect().top + y : 0);
+    G.heroTop = hero.offsetTop; G.heroH = hero.offsetHeight || innerHeight;
+    if (leadEl) G.lead = top(leadEl);
+    if (spans) { G.spans = top(spans); const h = Math.max(1, spans.offsetHeight); G.pierAt = pierItems.map((li) => li.offsetTop / h); }
+    if (contact) { const r = contact.getBoundingClientRect(); G.contact = r.top + y; G.contactH = r.height; }
+    if (cs && cs.fig) G.fig = top(cs.fig);
+    G.foot = top(footEl);
+    G.sheets = sheets.map(top);
+    G.docH = document.documentElement.scrollHeight;
+    if (ride) ride.measure(y);
+    G.dirty = false;
+  }
+  const regeo = () => { G.dirty = true; requestTick(); };
+  addEventListener('resize', regeo, { passive: true });
+  addEventListener('load', regeo);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(regeo, () => {});
+  if ('ResizeObserver' in window) { const ro = new ResizeObserver(regeo); ro.observe(document.body); if ($('main')) ro.observe($('main')); }
+  let lastChain = '', chainAt = 0, chainT = 0;
 
   function onScroll() {
     ticking = false;
-    if (camera) camera.update();
-    const y = scrollY, vh = innerHeight;
-    const heroH = hero.offsetHeight || vh;
+    if (G.dirty) measureGeo();
+    const y = frames.y(), vh = innerHeight;
+    const heroH = G.heroH;
 
     // the cover sheet is the instrument: once half of it has gone, the music fades and the sound switch goes with it
-    const coverLeft = hero.offsetTop + heroH - y;
+    const coverLeft = G.heroTop + heroH - y;
     const cut = camera && stackMQ.matches ? 0.8 : 0.5;
+    // well past it, the cover's own words leave the drawing: words that cannot be seen still cost a re-set every frame
     const off = offCover ? coverLeft < vh * (cut + 0.06) : coverLeft < vh * cut;
     if (off !== offCover) {
       offCover = off;
@@ -2326,6 +2421,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       if (off && harp && harp.playing) harp.stop(0.6);
       if (off) document.dispatchEvent(new Event('sb:offcover'));
     }
+
 
     // nav state
     const menuOpen = doc.classList.contains('menu-open');
@@ -2338,9 +2434,9 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       const now = performance.now();
       const vel = (y - lastY) / Math.max(8, now - lastT);
       lastT = now;
-      if (Math.abs(vel) > 0.05) {
+      if (fine && Math.abs(vel) > 0.05) { // headings lean with a mouse or trackpad scroll; a finger's own momentum is left alone
         skewT = clamp(-vel * 0.7, -1.6, 1.6);
-        if (!skewRaf) skewRaf = requestAnimationFrame(skewLoop);
+        if (!skewRaf) { skewLast = 0; skewRaf = requestAnimationFrame(skewLoop); }
       }
     }
     lastY = y;
@@ -2352,50 +2448,45 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       if (heroTitle && innerWidth > 899) heroTitle.style.translate = `0 ${(-p * 50).toFixed(2)}px`;
       // about: the lead statement inks in word by word
       if (leadWords) {
-        const r = leadEl.getBoundingClientRect();
-        const lit = Math.round(clamp((vh * 0.86 - r.top) / (vh * 0.86 - vh * 0.56), 0, 1) * leadWords.length);
+        const rt = G.lead - y;
+        const lit = Math.round(clamp((vh * 0.86 - rt) / (vh * 0.86 - vh * 0.56), 0, 1) * leadWords.length);
         if (lit !== lastLit) { lastLit = lit; leadWords.forEach((w, i) => w.classList.toggle('lit', i < lit)); }
       }
       // journey deck draws with scroll (or the train ride drives it)
-      if (ride && ride.update()) { /* ride in charge */ }
+      if (ride && ride.update(y)) { /* ride in charge */ }
       else if (spans) {
-        const r = spans.getBoundingClientRect();
+        const rt = G.spans - y;
         const start = vh * 0.82, end = vh * 0.38;
-        const d = clamp((start - r.top) / (start - end), 0, 1);
+        const d = clamp((start - rt) / (start - end), 0, 1);
         spans.style.setProperty('--deck', d.toFixed(4));
         spans.style.setProperty('--next', d >= 0.999 ? 1 : 0);
         const vertical = innerWidth <= 760;
         pierItems.forEach((li, i) => {
-          const at = vertical ? (li.offsetTop / Math.max(1, spans.offsetHeight)) : i / 2;
+          const at = vertical ? G.pierAt[i] : i / 2;
           li.classList.toggle('on', d >= at - 0.001 && d > 0);
         });
       }
       // sheet 05: headline lines drift apart, the next span grows
       if (contact) {
-        const r = contact.getBoundingClientRect();
-        const q = clamp((vh - r.top) / (vh + r.height), 0, 1);
+        const q = clamp((vh - (G.contact - y)) / (vh + G.contactH), 0, 1);
         const drift = innerWidth > 760 ? 90 : 0;
         if (contactLines[0]) contactLines[0].style.translate = `${((0.5 - q) * drift).toFixed(1)}px 0`;
         if (contactLines[1]) contactLines[1].style.translate = `${((q - 0.5) * drift).toFixed(1)}px 0`;
       }
-      if (cs && cs.fig) {
-        const r = cs.fig.getBoundingClientRect();
-        cs.update((vh * 0.88 - r.top) / (vh * 0.88 - vh * 0.4));
-      }
+      if (cs && cs.fig) cs.update((vh * 0.88 - (G.fig - y)) / (vh * 0.88 - vh * 0.4));
     }
 
     // phones: bottom sheet bar with progress
     if (sheetBar && innerWidth <= 760) {
-      const doc_h = document.documentElement.scrollHeight - vh;
-      const footTop = $('.site-foot').getBoundingClientRect().top;
+      const footTop = G.foot - y;
       sheetBar.classList.toggle('show', y > heroH * 0.75 && footTop > vh * 0.92 && !menuOpen && !nav.classList.contains('tucked'));
-      sbProg.style.transform = `scaleX(${clamp(y / Math.max(1, doc_h), 0, 1).toFixed(4)})`;
+      sbProg.style.transform = `scaleX(${clamp(y / Math.max(1, G.docH - vh), 0, 1).toFixed(4)})`;
     }
 
     // sheet indicator and chainage
     if (stTag) {
       let cur = sheets[0];
-      sheets.forEach((s) => { if (s.getBoundingClientRect().top <= vh * 0.45) cur = s; });
+      sheets.forEach((s, i) => { if (G.sheets[i] - y <= vh * 0.45) cur = s; });
       const num = cur.dataset.sheet;
       if (num !== currentSheet) {
         currentSheet = num;
@@ -2408,10 +2499,19 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
         }, 180);
       }
       const m = Math.round(y * 0.25);
-      stCh.textContent = `${Math.floor(m / 1000)}+${String(m % 1000).padStart(3, '0')}`;
+      const chain = `${Math.floor(m / 1000)}+${String(m % 1000).padStart(3, '0')}`;
+      if (chain !== lastChain) {
+        // new text means new layout, and a layout in the same frame as a camera move makes the browser re-set every label
+        // in the drawing; a number in motion reads just as well redrawn eight times a second, and it lands exactly
+        const put = () => { chainAt = performance.now(); lastChain = chain; stCh.textContent = chain; };
+        clearTimeout(chainT);
+        if (performance.now() - chainAt > 120) put(); else chainT = setTimeout(put, 130);
+      }
     }
+    // the camera writes last: nothing after it in this frame asks the page where things are
+    if (camera) camera.update(false, y);
   }
-  const requestTick = () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } };
+  const requestTick = () => { if (!ticking) { ticking = true; frames.request(onScroll, 1); } };
   addEventListener('scroll', requestTick, { passive: true });
   addEventListener('resize', requestTick, { passive: true });
 
@@ -2447,7 +2547,10 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
     // the drawing's own graph paper, under everything else in it: it travels and zooms with the camera
     const grid = mk('path', { class: 'cam-grid' });
     art.insertBefore(grid, $('.sun', art) || art.firstChild);
-    rig.append(art, ink);
+    // the camera moves this frame rather than the drawing itself: a moving svg makes the browser re-set every word in it
+    const mount = document.createElement('div'); mount.className = 'cam-art';
+    mount.append(art);
+    rig.append(mount, ink);
     layer.append(rig);
     if (touch) layer.append(paper, edge); else document.body.appendChild(edge);
     document.body.insertBefore(layer, document.body.firstChild);
@@ -2619,7 +2722,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       });
       if (cover) { cover.es = cover.ee = -Infinity; const c = segs.find((g) => g.page === cover); cover.xs = c.y0; cover.xe = c.y1; }
       const ox = Math.round(W * OVER), oy = Math.round(H * OVER);
-      Object.assign(art.style, { left: -ox + 'px', top: -oy + 'px', width: W + 2 * ox + 'px', height: H + 2 * oy + 'px', transformOrigin: `${ox + W / 2}px ${oy + H / 2}px` });
+      Object.assign(mount.style, { left: -ox + 'px', top: -oy + 'px', width: W + 2 * ox + 'px', height: H + 2 * oy + 'px', transformOrigin: `${ox + W / 2}px ${oy + H / 2}px` });
       ink.setAttribute('viewBox', `0 0 ${W} ${H}`);
       edge.setAttribute('viewBox', `0 0 ${W} ${H}`);
       const bubR = W < 600 ? 12 : 15;
@@ -2635,29 +2738,95 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
 
     // drawing: the viewBox is only rewritten now and then; in between, the camera moves the drawing as a picture
     // (a compositor transform), so a flight costs a few repaints instead of one per frame
-    let base = null, now = null, settleT = 0, lastTF = '', lastTilt = '', hiddenRig = false;
-    function commit(v) {
-      base = v; lastTF = 'none';
+    let base = null, now = null, settleT = 0, lastTF = '', lastTilt = '', hiddenRig = false, lastVB = '';
+    const heading = { y: NaN, dir: 1 };
+    // where the camera is at any point of the scroll
+    function viewAt(Y) {
+      const segs = M.segs;
+      let sg = segs[segs.length - 1];
+      for (let i = 0; i < segs.length; i++) if (Y < segs[i].y1) { sg = segs[i]; break; }
+      const p = clamp01((Y - sg.y0) / Math.max(1, sg.y1 - sg.y0));
+      return { sg, p, v: sg.kind === 'fly' ? sg.path(ease(p)) : mixV(sg.a, sg.b, smooth(p)) };
+    }
+    // the drawing's own words are kept only inside the picture being drawn: the browser re-sets every word in it when
+    // the camera moves on a frame where anything else on the page changes, and the redraw itself re-sets them all
+    const words = $$('text', art).map((t) => ({ t, box: null, on: true }));
+    function cull(x0, y0, w, h) {
+      if (words.length && !words[0].box) {
+        const inv = art.getScreenCTM();
+        if (!inv) return;
+        const root = inv.inverse();
+        words.forEach((wd) => {
+          const m = root.multiply(wd.t.getScreenCTM() || inv), bb = wd.t.getBBox();
+          const pts = [[bb.x, bb.y], [bb.x + bb.width, bb.y], [bb.x, bb.y + bb.height], [bb.x + bb.width, bb.y + bb.height]].map(([px, py]) => new DOMPoint(px, py).matrixTransform(m));
+          wd.box = [Math.min(...pts.map((q) => q.x)), Math.min(...pts.map((q) => q.y)), Math.max(...pts.map((q) => q.x)), Math.max(...pts.map((q) => q.y))];
+        });
+      }
+      const pad = 0.05 * w;
+      words.forEach((wd) => {
+        const [a0, b0, a1, b1] = wd.box, on = a1 >= x0 - pad && a0 <= x0 + w + pad && b1 >= y0 - pad && b0 <= y0 + h + pad;
+        if (on !== wd.on) { wd.on = on; wd.t.classList.toggle('cam-off', !on); }
+      });
+    }
+    function commit(b) {
+      base = b;
       const { W, H, ox, oy, gs, gx0, gy0 } = M;
-      const x0 = v.x - (W / 2 + ox) / v.s, y0 = v.y - (H / 2 + oy) / v.s, w = (W + 2 * ox) / v.s, h = (H + 2 * oy) / v.s;
-      art.setAttribute('viewBox', `${x0.toFixed(2)} ${y0.toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)}`);
-      art.style.transform = 'none';
+      const x0 = b.x - (W / 2 + ox) / b.s, y0 = b.y - (H / 2 + oy) / b.s, w = (W + 2 * ox) / b.s, h = (H + 2 * oy) / b.s;
+      cull(x0, y0, w, h);
+      lastVB = `${x0.toFixed(2)} ${y0.toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)}`;
+      art.setAttribute('viewBox', lastVB);
       // only the lines that can be seen: the same lattice every time, so the grid never swims between redraws
       let d = '';
       for (let gx = gx0 + Math.ceil((x0 - gx0) / gs) * gs; gx <= x0 + w; gx += gs) d += `M${gx.toFixed(2)} ${y0.toFixed(1)}V${(y0 + h).toFixed(1)}`;
       for (let gy = gy0 + Math.ceil((y0 - gy0) / gs) * gs; gy <= y0 + h; gy += gs) d += `M${x0.toFixed(1)} ${gy.toFixed(2)}H${(x0 + w).toFixed(1)}`;
       grid.setAttribute('d', d);
     }
-    function draw(v, force, slack) {
+    // the compositor carries the last redraw to where the camera is now
+    function place(v) {
+      const k = v.s / base.s, tx = (base.x - v.x) * v.s, ty = (base.y - v.y) * v.s;
+      const tf = Math.abs(k - 1) < 1e-5 && Math.abs(tx) < 0.02 && Math.abs(ty) < 0.02 ? 'none' : `translate3d(${tx.toFixed(2)}px,${ty.toFixed(2)}px,0) scale(${k.toFixed(5)})`;
+      if (tf !== lastTF) { mount.style.transform = tf; lastTF = tf; }
+    }
+    // a redraw also holds the next stretch of the move, in the direction the page is going, at the sharpest scale that
+    // stretch will need; the compositor then carries the picture along it, so the drawing is redrawn a few times a flight.
+    // While the camera moves fast, the picture may be carried up to a quarter larger than it was drawn, the way a map
+    // flies; the moment the move slows, it is redrawn pixel for pixel
+    const KMIN = 0.7;
+    let mvT = 0, mvV = null, mvEnv = 0, mvNow = 0;
+    function pace(v) {
+      const t = performance.now(), dt = mvT ? Math.max(0.004, (t - mvT) / 1000) : 0;
+      let r = 0;
+      if (dt && mvV && dt < 0.25) r = Math.max(Math.abs(Math.log(v.s / mvV.s)), Math.hypot(v.x - mvV.x, v.y - mvV.y) * v.s / M.W) / dt;
+      mvEnv = Math.max(r, dt ? mvEnv * Math.exp(-dt / 0.1) : 0);
+      mvT = t; mvV = v; mvNow = r;
+    }
+    const allow = (r) => 1 + 0.25 * smooth(clamp01((r - 0.8) / 1.4));
+    function plan(v, Y, slack, U) {
+      const { W, H, ox, oy } = M, LW = W + 2 * ox - 4, LH = H + 2 * oy - 4, hw = W * (0.5 + slack) + 2, hh = H * (0.5 + slack) + 2;
+      let s = v.s, lo = v.s, x0 = v.x - hw / v.s, x1 = v.x + hw / v.s, y0 = v.y - hh / v.s, y1 = v.y + hh / v.s;
+      const kmin = U > 1.01 ? KMIN : 0.8; // shrunk no further than this while the camera moves slowly, so lines keep their weight
+      const take = (u) => {
+        const ns = Math.max(s, u.s), nlo = Math.min(lo, u.s), rs = ns / U;
+        const nx0 = Math.min(x0, u.x - hw / u.s), nx1 = Math.max(x1, u.x + hw / u.s), ny0 = Math.min(y0, u.y - hh / u.s), ny1 = Math.max(y1, u.y + hh / u.s);
+        if ((nx1 - nx0) * rs > LW || (ny1 - ny0) * rs > LH || nlo / rs < kmin) return false;
+        s = ns; lo = nlo; x0 = nx0; x1 = nx1; y0 = ny0; y1 = ny1;
+        return true;
+      };
+      // ahead, finely and then in longer strides; then a step or two behind, so a scroll that wavers does not redraw
+      for (let j = 1; j <= 100; j++) if (!take(viewAt(Y + heading.dir * H * (j <= 40 ? j * 0.02 : 0.8 + (j - 40) * 0.06)).v)) break;
+      for (let j = 1; j <= 3; j++) if (!take(viewAt(Y - heading.dir * H * j * 0.02).v)) break;
+      return { x: (x0 + x1) / 2, y: (y0 + y1) / 2, s: s / U };
+    }
+    function draw(v, Y, force, slack) {
       now = v;
-      if (force || !base) { commit(v); return; }
+      if (force || !base) { clearTimeout(settleT); commit(v); place(v); return; }
       const { W, H, ox, oy } = M, k = v.s / base.s, tx = (base.x - v.x) * v.s, ty = (base.y - v.y) * v.s;
       const covered = k * (W / 2 + ox) - Math.abs(tx) > W / 2 + 2 + slack * W && k * (H / 2 + oy) - Math.abs(ty) > H / 2 + 2 + slack * H;
-      if (k < 0.86 || k > 1.16 || !covered) { commit(v); return; }
-      const tf = Math.abs(k - 1) < 1e-5 && Math.abs(tx) < 0.02 && Math.abs(ty) < 0.02 ? 'none' : `translate3d(${tx.toFixed(2)}px,${ty.toFixed(2)}px,0) scale(${k.toFixed(5)})`;
-      if (tf !== lastTF) { art.style.transform = tf; lastTF = tf; }
+      const U = allow(mvEnv), low = U > 1.01 ? KMIN - 0.02 : 0.78;
+      if (k < low || k > U + 0.0005 || !covered) commit(plan(v, Y, slack, allow(mvNow)));
+      place(v);
       clearTimeout(settleT);
-      if (tf !== 'none') settleT = setTimeout(() => { if (now && !doc.classList.contains('play-mode')) commit(now); }, 220); // crisp again at rest
+      if (lastTF !== 'none') settleT = setTimeout(() => { if (now && !doc.classList.contains('play-mode')) { commit(now); place(now); } }, 240); // pixel for pixel at rest
     }
 
     // the pencil layer follows the camera; rings and notes appear and fade with the moves
@@ -2688,11 +2857,13 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
         show(rg, f > 0.001 && a > 0.001);
         if (!rg.shown) return;
         const [cx, cy] = toS(rg.sh.ring[0], rg.sh.ring[1]), R = rg.sh.ring[2] * v.s;
-        rg.arc.setAttribute('d', arcPath(cx, cy, R, f));
-        rg.g.style.opacity = a.toFixed(3);
+        const d = arcPath(cx, cy, R, f), op = a.toFixed(3);
+        if (d !== rg.lastD) { rg.lastD = d; rg.arc.setAttribute('d', d); }
+        if (op !== rg.lastOp) { rg.lastOp = op; rg.g.style.opacity = op; }
         const ba = Math.PI * (rg.sh.ring[3] || 0.75), bOn = f > 0.32;
-        rg.bub.setAttribute('transform', `translate(${(cx + R * Math.cos(ba)).toFixed(1)} ${(cy + R * Math.sin(ba)).toFixed(1)})`);
-        rg.bub.style.opacity = bOn ? 1 : 0;
+        const bt = `translate(${(cx + R * Math.cos(ba)).toFixed(1)} ${(cy + R * Math.sin(ba)).toFixed(1)})`;
+        if (bt !== rg.lastB) { rg.lastB = bt; rg.bub.setAttribute('transform', bt); }
+        if (bOn !== rg.lastBOn) { rg.lastBOn = bOn; rg.bub.style.opacity = bOn ? 1 : 0; }
         if (rg.sketch) { // the span still to be built, sketched in pencil off the end of the deck
           rg.sketch.setAttribute('d', rg.sh.sketch.map(([x1, y1, x2, y2]) => { const [a1, b1] = toS(x1, y1), [a2, b2] = toS(x2, y2); return `M${a1.toFixed(1)} ${b1.toFixed(1)}L${a2.toFixed(1)} ${b2.toFixed(1)}`; }).join(''));
           rg.sketch.style.opacity = smooth(clamp01((f - 0.2) / 0.6)).toFixed(3);
@@ -2711,9 +2882,10 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
           let [x, y] = toS(nt.at[0], nt.at[1]);
           if (nt.n.hfl) x = clamp(x, 40, W - 64); // a water level holds anywhere along the water line
           placeNote(nt, x);
-          nt.g.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)})`);
-          nt.g.style.opacity = a.toFixed(3);
-          if (nt.lead) nt.lead.style.strokeDashoffset = (1 - d).toFixed(3);
+          const t = `translate(${x.toFixed(1)} ${y.toFixed(1)})`, op = a.toFixed(3), dash = (1 - d).toFixed(3);
+          if (t !== nt.lastT) { nt.lastT = t; nt.g.setAttribute('transform', t); }
+          if (op !== nt.lastOp) { nt.lastOp = op; nt.g.style.opacity = op; }
+          if (nt.lead && dash !== nt.lastDash) { nt.lastDash = dash; nt.lead.style.strokeDashoffset = dash; }
         });
       });
     }
@@ -2802,25 +2974,32 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
     }
 
     // phones: the camera follows the scroll a beat behind, like something with weight, so a flick glides rather than jumps
-    let Ys = null, lastNow = 0, glideLoop = 0;
-    function update(force) {
+    let Ys = null, lastNow = 0, glideLoop = 0, drawnY = NaN, hintsAway = false, hintsFar = false, hintsAt = 0;
+    function update(force, y) {
       if (doc.classList.contains('play-mode') || !M) return;
-      let Y = scrollY;
+      let Y = y === undefined ? frames.y() : y;
+      if (Y !== heading.y) { heading.dir = Y > heading.y ? 1 : -1; heading.y = Y; }
       if (touch) {
         const t = performance.now();
         if (Ys === null || force) Ys = Y;
         else { const dt = Math.min(0.05, Math.max(0, (t - lastNow) / 1000)); Ys += (Y - Ys) * (1 - Math.exp(-dt / 0.12)); if (Math.abs(Y - Ys) < 0.6) Ys = Y; }
         lastNow = t;
-        if (Ys !== Y && !glideLoop) glideLoop = requestAnimationFrame(() => { glideLoop = 0; update(); });
+        if (Ys !== Y && !glideLoop) glideLoop = frames.request(() => { glideLoop = 0; update(); }, 1);
         Y = Ys;
       }
+      if (!force && Math.abs(Y - drawnY) < 0.01) return;
+      drawnY = Y;
+      // the cover's hints go as the camera leaves the cover, and once faded they leave the drawing (words cost a re-set
+      // every frame the camera moves); they come back just before the camera gets home, to fade in again
+      // (decided here, frame by frame: a browser holds back timers while a page is being scrolled)
+      const home = M.segs[0].y1, away = Y > home + 0.02 * M.H, near = Y < home + 0.15 * M.H, t = performance.now();
+      if (away !== hintsAway) { hintsAway = away; hintsAt = t; doc.classList.toggle('cam-away', away); }
+      const far = hintsAway && !near && t - hintsAt > 220;
+      if (far !== hintsFar) { hintsFar = far; doc.classList.toggle('cover-far', far); }
       const rest = Y >= M.coverAt;
       if (rest !== hiddenRig) { hiddenRig = rest; layer.style.visibility = rest ? 'hidden' : ''; }
-      const segs = M.segs;
-      let sg = segs[segs.length - 1];
-      for (let i = 0; i < segs.length; i++) if (Y < segs[i].y1) { sg = segs[i]; break; }
-      const p = clamp01((Y - sg.y0) / Math.max(1, sg.y1 - sg.y0));
-      const v = sg.kind === 'fly' ? sg.path(ease(p)) : mixV(sg.a, sg.b, smooth(p));
+      const { sg, p, v } = viewAt(Y);
+      pace(v);
       if (touch) portholesTouch(v, Y); else portholes(v, Y);
       if (rest && !force) return;
       // the camera leans into a move, as if swooping low over the sheet
@@ -2830,7 +3009,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
         if (amp > 0.04) tilt = `perspective(1500px) rotateX(${(dy / n * amp).toFixed(2)}deg) rotateY(${(-dx / n * amp).toFixed(2)}deg)`;
       }
       if (tilt !== lastTilt) { rig.style.transform = tilt; lastTilt = tilt; }
-      draw(v, force, tilt === 'none' ? 0 : 0.07);
+      draw(v, Y, force, sg.kind === 'fly' && !touch ? 0.035 : 0); // room for the lean: 5 degrees moves a corner about 3% of the screen
       pencil(v, sg, p);
       shots.forEach((sh, i) => {
         const pg = M.pages[M.cover ? i + 1 : i];
@@ -2839,9 +3018,12 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       });
     }
     function relayout() { measure(); update(true); }
-    function refresh() { if (touch && M && innerWidth === M.W && viewH() === M.H) { update(); return; } relayout(); }
+    function refresh() {
+      if (touch && M && innerWidth === M.W && viewH() === M.H) { update(art.getAttribute('viewBox') !== lastVB); return; }
+      relayout();
+    }
     let roPending = 0;
-    if ('ResizeObserver' in window) new ResizeObserver(() => { if (!roPending) roPending = requestAnimationFrame(() => { roPending = 0; relayout(); }); }).observe($('main'));
+    if ('ResizeObserver' in window) new ResizeObserver(() => { if (!roPending) roPending = frames.request(() => { roPending = 0; relayout(); }, 1); }).observe($('main'));
     if (document.fonts && document.fonts.ready) document.fonts.ready.then(relayout, () => {});
     measure();
     return { update, refresh };
@@ -2866,30 +3048,45 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
   /* ---------- CAD cursor with object snap ---------- */
   if (fine && motion) safe(() => {
     const cur = $('.cursor'), cx = $('.cx', cur), snap = $('.snap', cur), ro = $('.readout', cur);
-    let mx = -100, my = -100, sx = -100, sy = -100, sw = 14, sh = 14, target = null, live = false, raf = 0;
+    let mx = -100, my = -100, sx = -100, sy = -100, sw = 14, sh = 14, target = null, live = false, raf = 0, last = 0;
+    let box = null, boxY = 0, boxFixed = false, lastXY = '', lastSnap = '', lastW = '', lastH = '';
     const SNAP = 'a, button, [data-snap]';
-    function loop() {
-      cx.style.transform = `translate3d(${mx}px,${my}px,0)`;
+    // a snapped target is measured when the pointer meets it; scrolling then moves the box by arithmetic
+    const grab = () => {
+      if (!target || !target.isConnected) { box = null; return; }
+      box = target.getBoundingClientRect(); boxY = scrollY;
+      boxFixed = !!target.closest('.nav, .menu, .sheet-bar, .legend, .play-ui, .sheet-tag');
+    };
+    function loop(now) {
+      const dt = last ? now - last : 16.67; last = now;
+      const xy = `translate3d(${mx}px,${my}px,0)`;
+      if (xy !== lastXY) { lastXY = xy; cx.style.transform = xy; }
       let tx, ty, tw, th;
-      if (target && target.isConnected) {
-        const r = target.getBoundingClientRect();
-        tx = r.left - 7; ty = r.top - 7; tw = r.width + 14; th = r.height + 14;
+      if (box) {
+        const shift = boxFixed ? 0 : frames.y() - boxY;
+        tx = box.left - 7; ty = box.top - shift - 7; tw = box.width + 14; th = box.height + 14;
       } else { tx = mx - 7; ty = my - 7; tw = 14; th = 14; }
-      const k = target ? 0.24 : 0.5;
+      const k = perFrame(target ? 0.24 : 0.5, dt);
       sx = lerp(sx, tx, k); sy = lerp(sy, ty, k); sw = lerp(sw, tw, k); sh = lerp(sh, th, k);
-      snap.style.transform = `translate3d(${sx.toFixed(2)}px,${sy.toFixed(2)}px,0)`;
-      snap.style.width = sw.toFixed(2) + 'px';
-      snap.style.height = sh.toFixed(2) + 'px';
-      raf = requestAnimationFrame(loop);
+      const t = `translate3d(${sx.toFixed(1)}px,${sy.toFixed(1)}px,0)`, w = sw.toFixed(1) + 'px', h = sh.toFixed(1) + 'px';
+      if (t !== lastSnap) { lastSnap = t; snap.style.transform = t; }
+      if (w !== lastW) { lastW = w; snap.style.width = w; }
+      if (h !== lastH) { lastH = h; snap.style.height = h; }
+      const settled = Math.abs(tx - sx) < 0.05 && Math.abs(ty - sy) < 0.05 && Math.abs(tw - sw) < 0.05 && Math.abs(th - sh) < 0.05;
+      raf = live && !settled ? requestAnimationFrame(loop) : 0;
+      if (!raf) last = 0;
     }
+    const wake = () => { if (live && !raf) raf = requestAnimationFrame(loop); };
+    addEventListener('scroll', wake, { passive: true });
     addEventListener('pointermove', (e) => {
       if (e.pointerType !== 'mouse') return;
       mx = e.clientX; my = e.clientY;
       if (!live) {
         live = true; sx = mx - 7; sy = my - 7;
         doc.classList.add('has-cursor'); cur.classList.add('on');
-        raf = requestAnimationFrame(loop);
       }
+      if (target) grab();
+      wake();
       // drawing coordinates while over the bridge
       let reading = false;
       if (art && !target) {
@@ -2913,6 +3110,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
         sound.note(fx, fx * 1.6 - 0.8);
       }
       target = t;
+      grab(); wake();
       cur.classList.toggle('snapping', !!t);
     });
     document.addEventListener('mouseout', (e) => {
@@ -3462,10 +3660,13 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       });
       rg.innerHTML = out;
     }
-    function loop() {
-      cx += (tx - cx) * 0.2;
+    let ltLast = 0;
+    function loop(now) {
+      const dt = ltLast ? now - ltLast : 16.67; ltLast = now;
+      cx += (tx - cx) * perFrame(0.2, dt);
       render(cx);
       raf = (active && Math.abs(tx - cx) > 0.05) ? requestAnimationFrame(loop) : 0;
+      if (!raf) ltLast = 0;
     }
     function setActive(v) {
       if (active === v) return;

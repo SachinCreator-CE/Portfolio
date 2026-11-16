@@ -465,6 +465,19 @@ html.menu-open body{overflow:hidden}
 [data-camera] .cam-edge .ce-rim{stroke:var(--ink);stroke-width:1.3}
 [data-camera] .cam-edge .ce-shade{stroke:var(--shade)}
 [data-camera].play-mode .cam-edge{display:none}
+/* touch screens: the paper and its porthole sit in the fixed layer with the drawing; the sheets carry only their grid
+   and their words, which fade in once the paper has opened and out before it closes */
+[data-camera][data-touch] .cam-layer{bottom:auto;height:100vh;height:100lvh}
+[data-camera] .cam-paper{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;background:color-mix(in srgb,var(--paper) 93%,transparent)}
+[data-camera][data-touch] .cam-edge{position:absolute;z-index:auto}
+[data-camera][data-touch] .sheet::before{background-color:transparent!important}
+[data-camera][data-touch] .sheet,[data-camera][data-touch] .hero .stage{will-change:opacity}
+[data-camera] .cam-shut,[data-camera] .cam-shut *{pointer-events:none!important}
+[data-camera][data-touch] .cam-shot{height:118vh;height:118svh}
+[data-camera][data-touch] .cam-shot.ga{height:140vh;height:140svh}
+[data-camera][data-touch] .cam-cap{transition:opacity .3s ease,translate .5s var(--ease-out)}
+[data-camera][data-touch] .art .sun{transition-duration:.45s}
+[data-camera][data-touch].off-cover .art .on-sun{transition:opacity .45s ease,visibility 0s .45s}
 [data-camera] .cam-cap{position:sticky;bottom:max(9vh,52px);align-self:flex-start;display:flex;align-items:center;gap:clamp(14px,1.3vw,20px);margin:0 0 max(9vh,52px) max(calc(var(--frame) + 26px),3.6vw);padding:12px 22px 12px 12px;
   border-radius:60px;background:color-mix(in srgb,var(--paper) 86%,transparent);box-shadow:0 0 22px 14px color-mix(in srgb,var(--paper) 86%,transparent);
   opacity:0;translate:0 14px;transition:opacity .6s ease,translate .9s var(--ease-out)}
@@ -2227,6 +2240,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
     return { fig, update };
   })();
   let lastY = scrollY, ticking = false, currentSheet = '01', offCover = false;
+  const stackMQ = matchMedia('(max-width: 899px)');
   const sheetBar = $('.sheet-bar'), sbProg = $('.sb-prog i'), sbNum = $('[data-sb-num]'), sbName = $('[data-sb-name]');
   /* sheet 03: a train rides the journey while the stage is pinned */
   const ride = (() => {
@@ -2303,7 +2317,8 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
 
     // the cover sheet is the instrument: once half of it has gone, the music fades and the sound switch goes with it
     const coverLeft = hero.offsetTop + heroH - y;
-    const off = offCover ? coverLeft < vh * 0.56 : coverLeft < vh * 0.5;
+    const cut = camera && stackMQ.matches ? 0.8 : 0.5;
+    const off = offCover ? coverLeft < vh * (cut + 0.06) : coverLeft < vh * cut;
     if (off !== offCover) {
       offCover = off;
       doc.classList.toggle('off-cover', off);
@@ -2417,6 +2432,16 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
     const shades = [[3, 4, 0.2], [8, 6, 0.11], [15, 9, 0.05]].map(([off, w, o]) => ({ off, c: mk('circle', { class: 'ce-shade', 'stroke-width': w, opacity: o }, edge) }));
     const rim = mk('circle', { class: 'ce-rim' }, edge);
     edge.style.display = 'none';
+    // on touch screens the page scrolls natively, ahead of any script; so there the sheets' paper and its porthole
+    // live in the fixed layer with the drawing, and a sheet's words fade in once its paper is open
+    const touch = !fine;
+    if (touch) doc.setAttribute('data-touch', '');
+    const paper = document.createElement('div'); paper.className = 'cam-paper'; paper.style.display = 'none';
+    // the large viewport height: it does not change while the address bar slides in and out
+    const probe = document.createElement('div'); probe.setAttribute('aria-hidden', 'true');
+    probe.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:100vh;height:100lvh;visibility:hidden;pointer-events:none';
+    document.body.appendChild(probe);
+    const viewH = () => (touch ? probe.offsetHeight || innerHeight : innerHeight);
     const slot = document.createElement('div'); slot.className = 'art art-slot'; slot.setAttribute('aria-hidden', 'true');
     art.parentNode.insertBefore(slot, art);
     // the drawing's own graph paper, under everything else in it: it travels and zooms with the camera
@@ -2424,8 +2449,8 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
     art.insertBefore(grid, $('.sun', art) || art.firstChild);
     rig.append(art, ink);
     layer.append(rig);
+    if (touch) layer.append(paper, edge); else document.body.appendChild(edge);
     document.body.insertBefore(layer, document.body.firstChild);
-    document.body.appendChild(edge);
     art.setAttribute('preserveAspectRatio', 'xMidYMid slice');
 
     // framings are [centre x, centre y, width, height] in drawing units, for wide screens and for tall phone screens;
@@ -2526,10 +2551,12 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
     }
 
     // layout: where every move starts and ends on the scroll, measured once per resize
-    const RX = 0.5, RN = 0.62, BEAT = 0.12, RHO = 1.6;
+    const RX = touch ? 0.42 : 0.5, RN = touch ? 0.5 : 0.62, BEAT = touch ? 0.06 : 0.12, RHO = 1.6, OVER = touch ? 0.15 : 0.2;
+    // phones: the camera eases across and pulls back a little on the way, so the bridge stays large on a tall screen
+    const glide = (a, b) => (t) => { const v = mixV(a, b, t); v.s *= 1 - 0.18 * Math.sin(Math.PI * t); return v; };
     let M = null;
     function measure() {
-      const W = innerWidth, H = innerHeight, Y = scrollY;
+      const W = innerWidth, H = viewH(), Y = scrollY;
       const [x0, y0, w0, h0] = heroVB();
       const key = `${w0} / ${h0}`;
       if (slot.style.aspectRatio !== key) slot.style.aspectRatio = key;
@@ -2563,7 +2590,8 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       const add = (kind, y0, y1, extra) => { if (y1 > y0 + 0.5) segs.push(Object.assign({ kind, y0, y1 }, extra)); };
       let y = -1e9, view = home;
       if (cover) { // phones: the cover's sheet closes into callout A before the camera moves
-        const xs = cover.bottom - H, xe = xs + RX * H;
+        // on touch screens it waits until its own paper fills the screen, so the fixed paper can take over unseen
+        const xs = touch ? Math.max(cover.bottom - 0.75 * H, cover.top + cut + 0.04 * H) : cover.bottom - H, xe = xs + RX * H;
         add('hold', y, xs, { a: home, b: home, i: -1 });
         add('exit', xs, xe, { a: home, b: home, i: 0, page: cover });
         y = xe;
@@ -2572,7 +2600,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
         const pg = pages[i];
         const es = Math.max(y + H * 0.3, pg.top - H), ee = es + RN * H;
         const fe = Math.max(y + H * 0.25, es - (BEAT + (sh.keyplan ? 0.3 : 0)) * H);
-        add('fly', y, Math.min(fe, es), { path: zoomPath(view, cams[i], W, RHO), from: view, to: cams[i], i });
+        add('fly', y, Math.min(fe, es), { path: touch ? glide(view, cams[i]) : zoomPath(view, cams[i], W, RHO), from: view, to: cams[i], i });
         capAt[i] = y + (Math.min(fe, es) - y) * 0.15;
         add('hold', fe, es, { a: cams[i], b: cams[i], i, beat: true });
         add('enter', es, ee, { a: cams[i], b: push[i], i, page: pg });
@@ -2590,7 +2618,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
         }
       });
       if (cover) { cover.es = cover.ee = -Infinity; const c = segs.find((g) => g.page === cover); cover.xs = c.y0; cover.xe = c.y1; }
-      const ox = Math.round(W * 0.2), oy = Math.round(H * 0.2);
+      const ox = Math.round(W * OVER), oy = Math.round(H * OVER);
       Object.assign(art.style, { left: -ox + 'px', top: -oy + 'px', width: W + 2 * ox + 'px', height: H + 2 * oy + 'px', transformOrigin: `${ox + W / 2}px ${oy + H / 2}px` });
       ink.setAttribute('viewBox', `0 0 ${W} ${H}`);
       edge.setAttribute('viewBox', `0 0 ${W} ${H}`);
@@ -2601,6 +2629,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       const all = cover ? [cover].concat(pages) : pages;
       all.forEach((pg) => { pg.state = ''; pg.clip = null; pg.op = null; });
       M = { W, H, segs, ox, oy, bubR, capAt, gs, gx0, gy0, pages: all, cover, coverAt: pages[last].ee + 2 };
+      if (touch) paperFor = '';
       notes.forEach((list) => list.forEach((nt) => { nt.w = 0; nt.side = 0; }));
     }
 
@@ -2731,9 +2760,60 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       if (edge.style.display !== (rimOn ? '' : 'none')) edge.style.display = rimOn ? '' : 'none';
     }
 
+    let paperFor = '';
+    function setFade(pg, state, op) {
+      if (pg.state !== state) { pg.state = state; pg.el.classList.toggle('cam-shut', state !== 'open'); }
+      const o = op >= 0.999 ? '' : op.toFixed(3);
+      if (o !== pg.op) { pg.op = o; pg.el.style.opacity = o; }
+    }
+    function portholesTouch(v, Y) {
+      const { W, H } = M;
+      let mode = 'none', r = 0, cx = 0, cy = 0, a = 1;
+      M.pages.forEach((pg) => {
+        const [state, p] = sheetState(pg, Y);
+        // its words: hidden until the paper has opened, gone before the paper starts to close
+        let op = 1;
+        if (state === 'shut') op = 0;
+        else if (state === 'enter') op = smooth(clamp01((p - 0.8) / 0.2));
+        else if (state === 'exit') op = 1 - smooth(clamp01(p / 0.22));
+        setFade(pg, state, op);
+        if (state === 'open') { if (!pg.cover && mode === 'none') mode = 'full'; return; }
+        if (state !== 'enter' && state !== 'exit') return;
+        const [rx, ry, rr] = shots[pg.k].ring;
+        const x = (rx - v.x) * v.s + W / 2, y = (ry - v.y) * v.s + H / 2, R = rr * v.s;
+        const far = Math.hypot(Math.max(x, W - x), Math.max(y, H - y)) + 6;
+        if (state === 'enter') r = p < 0.25 ? R * smooth(p / 0.25) : R + (far - R) * Math.pow(clamp01((p - 0.25) / 0.55), 1.7);
+        else { r = p < 0.24 ? far : p < 0.76 ? far + (R - far) * (1 - Math.pow(1 - (p - 0.24) / 0.52, 2)) : R; a = 1 - smooth(clamp01((p - 0.76) / 0.24)); }
+        mode = r >= far - 0.5 && a > 0.999 ? 'full' : 'move'; cx = x; cy = y; r = Math.max(0, r);
+      });
+      const key = mode === 'move' ? `${r.toFixed(1)}|${cx.toFixed(1)}|${cy.toFixed(1)}|${a.toFixed(3)}` : mode;
+      if (key === paperFor) return;
+      paperFor = key;
+      paper.style.display = mode === 'none' ? 'none' : '';
+      paper.style.clipPath = mode === 'move' ? `circle(${r.toFixed(1)}px at ${cx.toFixed(1)}px ${cy.toFixed(1)}px)` : '';
+      paper.style.opacity = mode === 'move' && a < 0.999 ? a.toFixed(3) : '';
+      const rimOn = mode === 'move' && r > 0.5;
+      edge.style.display = rimOn ? '' : 'none';
+      if (rimOn) {
+        rim.setAttribute('cx', cx.toFixed(1)); rim.setAttribute('cy', cy.toFixed(1)); rim.setAttribute('r', r.toFixed(1));
+        shades.forEach((sd) => { sd.c.setAttribute('cx', cx.toFixed(1)); sd.c.setAttribute('cy', cy.toFixed(1)); sd.c.setAttribute('r', (r + sd.off).toFixed(1)); });
+        edge.style.opacity = a < 0.999 ? a.toFixed(3) : '';
+      }
+    }
+
+    // phones: the camera follows the scroll a beat behind, like something with weight, so a flick glides rather than jumps
+    let Ys = null, lastNow = 0, glideLoop = 0;
     function update(force) {
       if (doc.classList.contains('play-mode') || !M) return;
-      const Y = scrollY;
+      let Y = scrollY;
+      if (touch) {
+        const t = performance.now();
+        if (Ys === null || force) Ys = Y;
+        else { const dt = Math.min(0.05, Math.max(0, (t - lastNow) / 1000)); Ys += (Y - Ys) * (1 - Math.exp(-dt / 0.12)); if (Math.abs(Y - Ys) < 0.6) Ys = Y; }
+        lastNow = t;
+        if (Ys !== Y && !glideLoop) glideLoop = requestAnimationFrame(() => { glideLoop = 0; update(); });
+        Y = Ys;
+      }
       const rest = Y >= M.coverAt;
       if (rest !== hiddenRig) { hiddenRig = rest; layer.style.visibility = rest ? 'hidden' : ''; }
       const segs = M.segs;
@@ -2741,23 +2821,28 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       for (let i = 0; i < segs.length; i++) if (Y < segs[i].y1) { sg = segs[i]; break; }
       const p = clamp01((Y - sg.y0) / Math.max(1, sg.y1 - sg.y0));
       const v = sg.kind === 'fly' ? sg.path(ease(p)) : mixV(sg.a, sg.b, smooth(p));
-      portholes(v, Y);
+      if (touch) portholesTouch(v, Y); else portholes(v, Y);
       if (rest && !force) return;
       // the camera leans into a move, as if swooping low over the sheet
       let tilt = 'none';
-      if (sg.kind === 'fly') {
+      if (sg.kind === 'fly' && !touch) {
         const amp = Math.sin(Math.PI * p) * 5, dx = sg.to.x - sg.from.x, dy = sg.to.y - sg.from.y, n = Math.hypot(dx, dy) || 1;
         if (amp > 0.04) tilt = `perspective(1500px) rotateX(${(dy / n * amp).toFixed(2)}deg) rotateY(${(-dx / n * amp).toFixed(2)}deg)`;
       }
       if (tilt !== lastTilt) { rig.style.transform = tilt; lastTilt = tilt; }
       draw(v, force, tilt === 'none' ? 0 : 0.07);
       pencil(v, sg, p);
-      shots.forEach((sh, i) => { const on = Y >= M.capAt[i]; if (sh.capOn !== on) { sh.capOn = on; sh.cap.classList.toggle('on', on); } });
+      shots.forEach((sh, i) => {
+        const pg = M.pages[M.cover ? i + 1 : i];
+        const on = Y >= M.capAt[i] && (!touch || Y < pg.es);
+        if (sh.capOn !== on) { sh.capOn = on; sh.cap.classList.toggle('on', on); }
+      });
     }
-    function refresh() { measure(); update(true); }
+    function relayout() { measure(); update(true); }
+    function refresh() { if (touch && M && innerWidth === M.W && viewH() === M.H) { update(); return; } relayout(); }
     let roPending = 0;
-    if ('ResizeObserver' in window) new ResizeObserver(() => { if (!roPending) roPending = requestAnimationFrame(() => { roPending = 0; refresh(); }); }).observe($('main'));
-    if (document.fonts && document.fonts.ready) document.fonts.ready.then(refresh, () => {});
+    if ('ResizeObserver' in window) new ResizeObserver(() => { if (!roPending) roPending = requestAnimationFrame(() => { roPending = 0; relayout(); }); }).observe($('main'));
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(relayout, () => {});
     measure();
     return { update, refresh };
   });

@@ -478,9 +478,9 @@ html.menu-open body{overflow:hidden}
 /* touch screens: the paper and its porthole sit in the fixed layer with the drawing; the sheets carry only their grid
    and their words, which fade in once the paper has opened and out before it closes */
 [data-camera][data-touch] .cam-layer{bottom:auto;height:100vh;height:100lvh}
-[data-camera] .cam-paper{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;background:color-mix(in srgb,var(--paper) 93%,transparent)}
 [data-camera][data-touch] .cam-edge{position:absolute;z-index:auto}
-[data-camera][data-touch] .sheet::before{background-color:transparent!important}
+[data-camera][data-touch] .cam-layer.cam-over{z-index:2} /* phones: the drawing over the page, porthole open */
+[data-camera][data-touch] .cam-layer.cam-over .cam-rig{background-color:var(--paper)} /* and solid paper round the hole */
 [data-camera][data-touch] .sheet,[data-camera][data-touch] .hero .stage{will-change:opacity}
 [data-camera] .cam-shut,[data-camera] .cam-shut *{pointer-events:none!important}
 [data-camera][data-touch] .cam-shot{height:118vh;height:118svh}
@@ -580,28 +580,33 @@ html.menu-open body{overflow:hidden}
 .cursor.reading .readout{opacity:1}
 html.has-cursor,html.has-cursor *{cursor:none!important}
 
-/* opening sequence */
-.loader{display:none;position:fixed;inset:0;z-index:350;pointer-events:none;--ld:min(42vmin,300px)}
+.nw{white-space:nowrap}
+
+/* opening sequence: the name goes up like a cable-stayed bridge, then flies to the title bar */
+.loader{display:none;position:fixed;inset:0;z-index:350;pointer-events:none}
 .motion.first-visit .loader{display:block}
+.motion.first-visit:not(.loaded) .loader{pointer-events:auto} /* a tap skips the opening, and never lands on the page underneath */
 .loader.gone{display:none!important}
 .motion.first-visit:not(.loaded) body{overflow:hidden}
 .ld-bg{position:absolute;inset:0;background-color:var(--paper);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:32px 32px;background-position:-1px -1px;clip-path:inset(0 0 0 0);transition:clip-path 1.15s cubic-bezier(.76,0,.24,1)}
 .loader.lifting .ld-bg{clip-path:inset(0 0 100% 0)}
 .ld-meta{position:absolute;inset:calc(var(--frame) + 26px) calc(var(--frame) + 30px);display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto 1fr auto;transition:opacity .45s ease}
-.loader.lifting .ld-meta,.loader.lifting .ld-draw{opacity:0;transition:opacity .4s ease}
-.ld-name{font:italic 400 25px/1 var(--font-display);color:var(--ink)}
-.ld-set,.ld-status{font:500 var(--lbl)/1.2 var(--font-tech);letter-spacing:var(--lbl-track);text-transform:uppercase;color:var(--graphite)}
-.ld-set{justify-self:end;text-align:right}
+.loader.lifting .ld-meta,.loader.lifting .ld-rig{opacity:0;transition:opacity .4s ease}
+.ld-set,.ld-status,.ld-scale{font:500 var(--lbl)/1.2 var(--font-tech);letter-spacing:var(--lbl-track);text-transform:uppercase;color:var(--graphite)}
 .ld-status{grid-row:3;align-self:end}
-.ld-count{grid-row:3;justify-self:end;align-self:end;font-family:var(--font-display);font-weight:300;font-size:clamp(64px,11vw,168px);line-height:.8;letter-spacing:-.04em;color:var(--ink);font-variant-numeric:tabular-nums lining-nums}
-.ld-draw{position:absolute;left:50%;top:50%;width:var(--ld);height:var(--ld);margin:calc(var(--ld) / -2) 0 0 calc(var(--ld) / -2)}
-.ld-draw svg{display:block;width:100%;height:100%;overflow:visible}
-.ld-ring{fill:none;stroke:var(--ink);stroke-width:1.1}
-.ld-guide{fill:none;stroke:var(--rule-strong);stroke-width:.7;stroke-dasharray:2 4}
-.ld-arm{transform-origin:100px 100px}
-.ld-arm line{stroke:var(--ink);stroke-width:1}
-.ld-arm circle{fill:var(--paper);stroke:var(--ink);stroke-width:1}
-.ld-sun{position:absolute;left:50%;top:50%;width:var(--ld);height:var(--ld);margin:calc(var(--ld) / -2) 0 0 calc(var(--ld) / -2);border-radius:50%;background:var(--sun);transform:scale(0);will-change:transform}
+.ld-scale{grid-row:3;justify-self:end;align-self:end;text-align:right}
+.ld-title{position:absolute;inset:0;display:grid;place-items:center}
+.ld-word{position:relative;margin-top:.56em;font:italic 400 clamp(34px,min(11vw,18vh),152px)/1 var(--font-display);letter-spacing:-.02em;color:var(--ink);white-space:nowrap;opacity:0;transform-origin:0 0}
+.ld-word.set{opacity:1}
+@media (max-aspect-ratio:3/4){.ld-word{margin-top:1.66em}} /* phones held upright: a taller pylon, so the name sits lower */
+.ld-word .ch{position:relative}
+.ld-rig{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
+.ld-rig line{fill:none;stroke:var(--ink)}
+.ld-rig .pyl{stroke-width:1.5}
+.ld-rig .dk{stroke-width:1.2}
+.ld-rig .cab{stroke-width:.8;stroke-opacity:.7}
+.ld-rig .top{fill:var(--ink)}
+.ld-rig .anc{fill:var(--paper);stroke:var(--ink);stroke-width:1}
 
 /* load test on the cover drawing */
 .art{touch-action:pan-y}
@@ -833,8 +838,11 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
 
 /* ---------- responsive ---------- */
 @media (max-width:1180px){
-  .results,.more-results{grid-template-columns:1fr}
+  .results{grid-template-columns:1fr}
   .group+.group{border-left:0;padding-left:0;border-top:1px solid var(--rule);margin-top:36px}
+  /* the further entrance exams and the olympiads stay side by side at every width */
+  .more-results .group+.group{border-top:0;margin-top:0;border-left:1px solid var(--rule);padding-left:clamp(14px,3.2vw,44px)}
+  .more-results .group:first-child{padding-right:clamp(12px,2vw,24px)}
   .tb-full{grid-template-columns:1.6fr 1fr 1fr}
   .tb-cell:nth-child(4){border-left:0}
   .tb-cell:nth-child(n+4){border-top:1px solid var(--rule-strong)}
@@ -951,6 +959,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
   .tb-cell{border-left:0;border-top:1px solid var(--rule-strong)}
   .tb-cell:first-child{grid-column:1/-1;border-top:0}
   .tb-cell:nth-child(odd):not(:first-child){border-left:1px solid var(--rule-strong)}
+  .tb-cell:last-child:nth-child(even){grid-column:1/-1} /* a last cell on its own takes the whole row */
   .foot-meta{flex-direction:column;gap:4px}
 }
 /* phones held sideways: portrait and copy side by side, so the plate is not taller than the screen */
@@ -961,6 +970,13 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
 @media (max-width:420px){
   .tune-link .tn-x{display:none}
   .play-cap{font-size:14.5px}
+}
+@media (max-width:600px){
+  /* side by side on a phone: each line puts the exam over its result */
+  .more-results .schedule>div{grid-template-columns:minmax(0,1fr);gap:4px;padding:12px 0}
+  .more-results .schedule dd{font-size:16.5px;line-height:1.3}
+  .more-results .schedule dd small{font-size:12.5px;line-height:1.35}
+  .more-results .group-title{gap:8px}
 }
 @media (max-width:480px){
   .stats{gap:18px}
@@ -980,9 +996,8 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
 <div class="grain" aria-hidden="true"></div>
 <div class="loader" aria-hidden="true">
   <div class="ld-bg"></div>
-  <div class="ld-draw"><svg viewBox="0 0 200 200"><path class="ld-guide" d="M100 -26V226M-26 100H226"/><circle class="ld-ring" cx="100" cy="100" r="99.5"/><g class="ld-arm"><line x1="100" y1="100" x2="199.5" y2="100"/><circle cx="100" cy="100" r="2.6"/><circle cx="199.5" cy="100" r="2"/></g></svg></div>
-  <div class="ld-sun"></div>
-  <div class="ld-meta"><span class="ld-name">Sachin Balakrishna</span><span class="ld-set">Drawing set<br>5 sheets, rev A</span><span class="ld-status">Plotting sheet 01</span><span class="ld-count" data-ld>000</span></div>
+  <div class="ld-meta"><span class="ld-set">Drawing set<br>5 sheets, rev A</span><span class="ld-status">Lettering the title</span><span class="ld-scale">Scale 1:1</span></div>
+  <div class="ld-title"><div class="ld-word">Sachin Balakrishna</div></div>
 </div>
 <div class="frame" aria-hidden="true"><span class="fl fl-t"></span><span class="fl fl-r"></span><span class="fl fl-b"></span><span class="fl fl-l"></span><span class="cm cm-t"></span><span class="cm cm-b"></span><span class="cm cm-l"></span><span class="cm cm-r"></span></div>
 
@@ -1154,7 +1169,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       <div><dt>Drawn by</dt><dd>Sachin Balakrishna</dd></div>
       <div><dt>Discipline</dt><dd>Civil Engineering</dd></div>
       <div><dt>Institute</dt><dd>IIT Hyderabad</dd></div>
-      <div><dt>Location</dt><dd>17.59° N, 78.12° E</dd></div>
+      <div><dt>Location</dt><dd class="nw">17.59° N, 78.12° E</dd></div>
     </dl>
   </div>
 </section>
@@ -1392,8 +1407,8 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
   <div class="wrap">
     <div class="tb-full">
       <div class="tb-cell"><span class="tb-label">Project</span><span class="tb-big">Sachin Balakrishna</span></div>
-      <div class="tb-cell"><span class="tb-label">Built</span><span class="tb-val">By Sachin Balakrishna, with AI</span></div>
-      <div class="tb-cell"><span class="tb-label">Location</span><span class="tb-val">IIT Hyderabad<br>17.59° N, 78.12° E</span></div>
+      <div class="tb-cell"><span class="tb-label">Built</span><span class="tb-val">By Sachin Balakrishna</span></div>
+      <div class="tb-cell"><span class="tb-label">Location</span><span class="tb-val">IIT Hyderabad<br><span class="nw">17.59° N, 78.12° E</span></span></div>
       <div class="tb-cell"><span class="tb-label">Local time</span><span class="tb-val" data-clock>Hyderabad</span></div>
       <div class="tb-cell"><span class="tb-label">Revision</span><span class="tb-val">A, 2026</span></div>
       <div class="tb-cell"><span class="tb-label">Return</span><a class="roll tb-val" href="#top"><span class="rt"><span data-t="Back to top">Back to top</span></span></a></div>
@@ -1813,6 +1828,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
 
   /* ---------- intro: the bridge is built in construction order ---------- */
   const introAnims = [];
+  let nameFlight = 0; // how long the opening's name takes to fly to the top bar, when it does
   let ambient = [];
   function play(el, kf, opts) {
     if (!el) return null;
@@ -1857,7 +1873,8 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
     play($('.fl-l'), [{ transform: 'scaleY(0)' }, { transform: 'scaleY(1)' }], { duration: 1200, delay: 350, easing: EASE_IO });
 
     // navigation
-    fade($('.brand'), T(150), 900);
+    if (nameFlight) play($('.brand'), [{ opacity: 0 }, { opacity: 0, offset: 0.96 }, { opacity: 1 }], { duration: nameFlight, easing: 'linear' });
+    else fade($('.brand'), T(150), 900);
     play($('.nav-rule'), [{ transform: 'scaleX(0)' }, { transform: 'scaleX(1)' }], { delay: 250, duration: 1500, easing: EASE_IO });
     $$('.links > *').forEach((el, i) => rise(el, 450 + i * 70, 900, 10));
     $$('.nav-tools > :not(.sound-tip)').forEach((el, i) => rise(el, 750 + i * 70, 900, 10));
@@ -1876,16 +1893,9 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
     $$('.guide path', art).forEach((p, i) => draw(p, 60 + i * 90, 900));
     $$('.dot circle', art).forEach((c, i) => play(c, [{ scale: 0 }, { scale: 1 }], { delay: 650 + i * 90, duration: 600, easing: EASE_OUT }));
     // 2. the sun rises behind the site
-    if (loaderRan) {
-      // the opening sequence carries the sun into place; reveal the real one as it lands
-      const land = [{ opacity: 0 }, { opacity: 0, offset: 0.98 }, { opacity: 1 }];
-      play($('.sun', art), land, { duration: 1150, easing: 'linear' });
-      play($('#sunmask circle', art), land, { duration: 1150, easing: 'linear' });
-    } else {
-      const sunK = [{ scale: 0.35, opacity: 0 }, { scale: 1, opacity: 1 }];
-      play($('.sun', art), sunK, { delay: 160, duration: 1700, easing: EASE_OUT });
-      play($('#sunmask circle', art), sunK, { delay: 160, duration: 1700, easing: EASE_OUT });
-    }
+    const sunK = [{ scale: 0.35, opacity: 0 }, { scale: 1, opacity: 1 }];
+    play($('.sun', art), sunK, { delay: 160, duration: 1700, easing: EASE_OUT });
+    play($('#sunmask circle', art), sunK, { delay: 160, duration: 1700, easing: EASE_OUT });
     const orbit = $('.orbit', art);
     play(orbit, [{ opacity: 0, rotate: '-70deg' }, { opacity: opacityOf(orbit), rotate: '0deg' }], { delay: 420, duration: 2000, easing: EASE_OUT });
     // 3. ground, river and the line of the approach
@@ -1947,7 +1957,6 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
     });
   }
 
-  let loaderRan = false;
   if (motion) {
     const fontsReady = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
     const fontsP = Promise.race([fontsReady, new Promise((r) => setTimeout(r, 1200))]);
@@ -1968,7 +1977,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
         doc.classList.add('loaded');
         const L = $('.loader'); if (L) L.classList.add('gone');
         go();
-      }, 5500);
+      }, 6500);
     } else {
       fontsP.then(go);
     }
@@ -2532,11 +2541,10 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
     const shades = [[3, 4, 0.2], [8, 6, 0.11], [15, 9, 0.05]].map(([off, w, o]) => ({ off, c: mk('circle', { class: 'ce-shade', 'stroke-width': w, opacity: o }, edge) }));
     const rim = mk('circle', { class: 'ce-rim' }, edge);
     edge.style.display = 'none';
-    // on touch screens the page scrolls natively, ahead of any script; so there the sheets' paper and its porthole
-    // live in the fixed layer with the drawing, and a sheet's words fade in once its paper is open
+    // on touch screens the page scrolls natively, ahead of any script, so nothing on it is clipped to follow the camera:
+    // instead the drawing comes over the page with a porthole cut in it, and the porthole opens onto the real sheet
     const touch = !fine;
     if (touch) doc.setAttribute('data-touch', '');
-    const paper = document.createElement('div'); paper.className = 'cam-paper'; paper.style.display = 'none';
     // the large viewport height: it does not change while the address bar slides in and out
     const probe = document.createElement('div'); probe.setAttribute('aria-hidden', 'true');
     probe.style.cssText = 'position:fixed;left:0;top:0;width:1px;height:100vh;height:100lvh;visibility:hidden;pointer-events:none';
@@ -2552,7 +2560,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
     mount.append(art);
     rig.append(mount, ink);
     layer.append(rig);
-    if (touch) layer.append(paper, edge); else document.body.appendChild(edge);
+    if (touch) layer.append(edge); else document.body.appendChild(edge);
     document.body.insertBefore(layer, document.body.firstChild);
     art.setAttribute('preserveAspectRatio', 'xMidYMid slice');
 
@@ -2693,7 +2701,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       const add = (kind, y0, y1, extra) => { if (y1 > y0 + 0.5) segs.push(Object.assign({ kind, y0, y1 }, extra)); };
       let y = -1e9, view = home;
       if (cover) { // phones: the cover's sheet closes into callout A before the camera moves
-        // on touch screens it waits until its own paper fills the screen, so the fixed paper can take over unseen
+        // on touch screens it waits until the cover's own paper fills the screen, so the porthole closes on a whole sheet
         const xs = touch ? Math.max(cover.bottom - 0.75 * H, cover.top + cut + 0.04 * H) : cover.bottom - H, xe = xs + RX * H;
         add('hold', y, xs, { a: home, b: home, i: -1 });
         add('exit', xs, xe, { a: home, b: home, i: 0, page: cover });
@@ -2701,7 +2709,9 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       } else { add('hold', y, H * 0.08, { a: home, b: home, i: -1 }); y = H * 0.08; }
       shots.forEach((sh, i) => {
         const pg = pages[i];
-        const es = Math.max(y + H * 0.3, pg.top - H), ee = es + RN * H;
+        // the porthole opens once the sheet's top is on its way up the screen, so its heading rises into the hole
+        // rather than the hole opening on blank paper
+        const es = Math.max(y + H * 0.3, pg.top - (touch ? 0.62 : 0.8) * H), ee = es + RN * H;
         const fe = Math.max(y + H * 0.25, es - (BEAT + (sh.keyplan ? 0.3 : 0)) * H);
         add('fly', y, Math.min(fe, es), { path: touch ? glide(view, cams[i]) : zoomPath(view, cams[i], W, RHO), from: view, to: cams[i], i });
         capAt[i] = y + (Math.min(fe, es) - y) * 0.15;
@@ -2732,7 +2742,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       const all = cover ? [cover].concat(pages) : pages;
       all.forEach((pg) => { pg.state = ''; pg.clip = null; pg.op = null; });
       M = { W, H, segs, ox, oy, bubR, capAt, gs, gx0, gy0, pages: all, cover, coverAt: pages[last].ee + 2 };
-      if (touch) paperFor = '';
+      if (touch) holeFor = '';
       notes.forEach((list) => list.forEach((nt) => { nt.w = 0; nt.side = 0; }));
     }
 
@@ -2800,7 +2810,7 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       mvEnv = Math.max(r, dt ? mvEnv * Math.exp(-dt / 0.1) : 0);
       mvT = t; mvV = v; mvNow = r;
     }
-    const allow = (r) => 1 + 0.25 * smooth(clamp01((r - 0.8) / 1.4));
+    const allow = (r) => 1 + (touch ? 0.5 : 0.25) * smooth(clamp01((r - 0.8) / 1.4)); // phones: dense screens hide it
     function plan(v, Y, slack, U) {
       const { W, H, ox, oy } = M, LW = W + 2 * ox - 4, LH = H + 2 * oy - 4, hw = W * (0.5 + slack) + 2, hh = H * (0.5 + slack) + 2;
       let s = v.s, lo = v.s, x0 = v.x - hw / v.s, x1 = v.x + hw / v.s, y0 = v.y - hh / v.s, y1 = v.y + hh / v.s;
@@ -2898,12 +2908,21 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       if (Y < pg.xe) return ['exit', (Y - pg.xs) / (pg.xe - pg.xs)];
       return ['shut', 0];
     }
-    function setSheet(pg, state, clip, op) {
-      if (pg.state !== state) {
-        pg.state = state;
-        pg.el.style.willChange = state === 'enter' || state === 'exit' ? 'transform' : ''; // its own layer while the circle moves
-        pg.el.classList.toggle('cam-shut', state === 'shut');
-      }
+    // how far a porthole is open as its sheet comes and goes: it opens out of the callout and swells to the whole screen
+    // in one unbroken motion, growing by the same proportion each moment (the way a zoom feels even), easing in and out,
+    // never pausing at the callout and never starting with a jolt; going, it shrinks the same way and closes to a point
+    const swell = (t) => 0.5 - 0.5 * Math.cos(Math.PI * t);
+    function aperture(state, p, R, far) {
+      const k = Math.log(Math.max(far, R + 1) / Math.max(R, 1));
+      if (state === 'enter') return Math.min(far, R * smooth(clamp01(p / 0.22)) * Math.exp(k * swell(clamp01((p - 0.03) / 0.94))));
+      return R * (1 - smooth(clamp01((p - 0.72) / 0.28))) * Math.exp(k * (1 - swell(clamp01(p / 0.88))));
+    }
+    function setSheet(pg, state, clip, op, warm) {
+      if (pg.state !== state) { pg.state = state; pg.el.classList.toggle('cam-shut', state === 'shut'); }
+      // its own layer from a little before the porthole opens until it closes, made once rather than at every change of
+      // state, so no frame of the move has to paint the sheet afresh
+      const wc = warm ? 'transform' : '';
+      if (wc !== pg.wc) { pg.wc = wc; pg.el.style.willChange = wc; }
       if (clip !== pg.clip) { pg.clip = clip; pg.el.style.clipPath = clip; }
       if (op !== pg.op) { pg.op = op; pg.el.style.opacity = op; }
     }
@@ -2912,64 +2931,60 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
       let rimOn = false;
       M.pages.forEach((pg) => {
         const [state, p] = sheetState(pg, Y);
-        if (state === 'open') { setSheet(pg, state, '', ''); return; }
-        if (state === 'shut') { setSheet(pg, state, 'circle(0px at 0px 0px)', ''); return; }
+        const warm = state !== 'shut' || (Y > pg.es - 0.5 * H && Y < pg.es);
+        if (state === 'open') { setSheet(pg, state, '', '', warm); return; }
+        if (state === 'shut') { setSheet(pg, state, 'circle(0px at 0px 0px)', '', warm); return; }
         const [rx, ry, rr] = shots[pg.k].ring;
         const cx = (rx - v.x) * v.s + W / 2, cy = (ry - v.y) * v.s + H / 2, R = rr * v.s;
         const far = Math.hypot(Math.max(cx, W - cx), Math.max(cy, H - cy)) + 6;
-        let r, op = 1;
-        if (state === 'enter') r = p < 0.28 ? R * smooth(p / 0.28) : R + (far - R) * Math.pow((p - 0.28) / 0.72, 1.7);
-        else { r = p < 0.72 ? far + (R - far) * (1 - Math.pow(1 - p / 0.72, 2)) : R; op = 1 - smooth(clamp01((p - 0.72) / 0.28)); }
-        r = Math.max(0, r);
-        setSheet(pg, state, `circle(${r.toFixed(1)}px at ${(cx - pg.left).toFixed(1)}px ${(cy - (pg.top - Y)).toFixed(1)}px)`, op < 0.999 ? op.toFixed(3) : '');
+        const r = Math.max(0, aperture(state, p, R, far));
+        setSheet(pg, state, `circle(${r.toFixed(1)}px at ${(cx - pg.left).toFixed(1)}px ${(cy - (pg.top - Y)).toFixed(1)}px)`, '', warm);
         if (r > 0.5 && r < far - 1) {
           rimOn = true;
           rim.setAttribute('cx', cx.toFixed(1)); rim.setAttribute('cy', cy.toFixed(1)); rim.setAttribute('r', r.toFixed(1));
           shades.forEach((sd) => { sd.c.setAttribute('cx', cx.toFixed(1)); sd.c.setAttribute('cy', cy.toFixed(1)); sd.c.setAttribute('r', (r + sd.off).toFixed(1)); });
-          edge.style.opacity = op < 0.999 ? op.toFixed(3) : '';
         }
       });
       if (edge.style.display !== (rimOn ? '' : 'none')) edge.style.display = rimOn ? '' : 'none';
     }
 
-    let paperFor = '';
     function setFade(pg, state, op) {
       if (pg.state !== state) { pg.state = state; pg.el.classList.toggle('cam-shut', state !== 'open'); }
       const o = op >= 0.999 ? '' : op.toFixed(3);
       if (o !== pg.op) { pg.op = o; pg.el.style.opacity = o; }
     }
+    // phones: while a sheet comes or goes, the drawing lies over the page with a round hole in it. The hole opens from
+    // the callout to the whole screen as the sheet comes in, and closes back onto the callout as it goes, showing the
+    // real page, crisp, at its own scroll; outside those moments the drawing lies under the page as everywhere else
+    let holeFor = '';
     function portholesTouch(v, Y) {
       const { W, H } = M;
-      let mode = 'none', r = 0, cx = 0, cy = 0, a = 1;
+      let on = false, r = 0, cx = 0, cy = 0;
       M.pages.forEach((pg) => {
         const [state, p] = sheetState(pg, Y);
-        // its words: hidden until the paper has opened, gone before the paper starts to close
-        let op = 1;
-        if (state === 'shut') op = 0;
-        else if (state === 'enter') op = smooth(clamp01((p - 0.8) / 0.2));
-        else if (state === 'exit') op = 1 - smooth(clamp01(p / 0.22));
-        setFade(pg, state, op);
-        if (state === 'open') { if (!pg.cover && mode === 'none') mode = 'full'; return; }
+        // the cover's own words go as its porthole nears the callout, so the last of it closes on clean paper
+        setFade(pg, state, state === 'shut' ? 0 : pg.cover && state === 'exit' ? 1 - smooth(clamp01((p - 0.2) / 0.25)) : 1);
         if (state !== 'enter' && state !== 'exit') return;
         const [rx, ry, rr] = shots[pg.k].ring;
         const x = (rx - v.x) * v.s + W / 2, y = (ry - v.y) * v.s + H / 2, R = rr * v.s;
         const far = Math.hypot(Math.max(x, W - x), Math.max(y, H - y)) + 6;
-        if (state === 'enter') r = p < 0.25 ? R * smooth(p / 0.25) : R + (far - R) * Math.pow(clamp01((p - 0.25) / 0.55), 1.7);
-        else { r = p < 0.24 ? far : p < 0.76 ? far + (R - far) * (1 - Math.pow(1 - (p - 0.24) / 0.52, 2)) : R; a = 1 - smooth(clamp01((p - 0.76) / 0.24)); }
-        mode = r >= far - 0.5 && a > 0.999 ? 'full' : 'move'; cx = x; cy = y; r = Math.max(0, r);
+        const rr2 = aperture(state, p, R, far);
+        if (rr2 >= far - 0.5) return; // wide open: the sheet is simply the page
+        on = true; r = Math.max(0, rr2); cx = x; cy = y;
       });
-      const key = mode === 'move' ? `${r.toFixed(1)}|${cx.toFixed(1)}|${cy.toFixed(1)}|${a.toFixed(3)}` : mode;
-      if (key === paperFor) return;
-      paperFor = key;
-      paper.style.display = mode === 'none' ? 'none' : '';
-      paper.style.clipPath = mode === 'move' ? `circle(${r.toFixed(1)}px at ${cx.toFixed(1)}px ${cy.toFixed(1)}px)` : '';
-      paper.style.opacity = mode === 'move' && a < 0.999 ? a.toFixed(3) : '';
-      const rimOn = mode === 'move' && r > 0.5;
+      const key = on ? `${r.toFixed(1)}|${cx.toFixed(1)}|${cy.toFixed(1)}` : '';
+      if (key === holeFor) return;
+      holeFor = key;
+      layer.classList.toggle('cam-over', on);
+      if (on) {
+        const f = (n) => n.toFixed(1);
+        rig.style.clipPath = `path(evenodd, "M-4 -4H${W + 4}V${H + 4}H-4Z M${f(cx - r)} ${f(cy)}a${f(r)} ${f(r)} 0 1 0 ${f(2 * r)} 0a${f(r)} ${f(r)} 0 1 0 ${f(-2 * r)} 0Z")`;
+      } else rig.style.clipPath = '';
+      const rimOn = on && r > 0.5;
       edge.style.display = rimOn ? '' : 'none';
       if (rimOn) {
         rim.setAttribute('cx', cx.toFixed(1)); rim.setAttribute('cy', cy.toFixed(1)); rim.setAttribute('r', r.toFixed(1));
         shades.forEach((sd) => { sd.c.setAttribute('cx', cx.toFixed(1)); sd.c.setAttribute('cy', cy.toFixed(1)); sd.c.setAttribute('r', (r + sd.off).toFixed(1)); });
-        edge.style.opacity = a < 0.999 ? a.toFixed(3) : '';
       }
     }
 
@@ -3121,46 +3136,113 @@ kbd{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 
   });
 
   /* ---------- opening sequence: a compass draws the sun, then hands it to the drawing ---------- */
+  /* ---------- opening: the name goes up like a cable-stayed bridge, then flies to the title bar ---------- */
+  // A pylon rises, the deck grows out both ways from it, and every letter is lifted into place on its own
+  // stay, nearest the pylon first, the way a balanced cantilever is built. Then the stays come off, the
+  // sheet lifts away and the name settles into the top bar. A tap, a key or a scroll skips to the end.
   function runLoader(fontsP) {
     return new Promise((resolve) => {
-      const L = $('.loader');
-      if (!L) { resolve(false); return; }
-      const count = $('[data-ld]', L), ring = $('.ld-ring', L), arm = $('.ld-arm', L), sunEl = $('.ld-sun', L), status = $('.ld-status', L);
-      const len = ring.getTotalLength();
-      ring.style.strokeDasharray = `${len} ${len}`;
-      ring.style.strokeDashoffset = String(len);
-      const t0 = performance.now(), D = 1500;
-      const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
-      const step = (now) => {
-        const p = clamp((now - t0) / D, 0, 1), e = ease(p);
-        count.textContent = String(Math.round(e * 100)).padStart(3, '0');
-        ring.style.strokeDashoffset = (len * (1 - e)).toFixed(2);
-        arm.style.transform = `rotate(${(e * 360).toFixed(2)}deg)`;
-        if (p < 1) requestAnimationFrame(step); else fontsP.then(finish, finish);
+      const L = $('.loader'), word = L && $('.ld-word', L);
+      if (!L || !word) { resolve(false); return; }
+      const status = $('.ld-status', L), anims = [], skipOn = ['pointerdown', 'keydown', 'wheel', 'touchstart'];
+      let liftT = 0, statusT = 0, lifted = false, fs = 0, asc = 0, yb = 0;
+      const anim = (el, kf, o) => { const a = el.animate(kf, Object.assign({ fill: 'both' }, o)); anims.push(a); return a; };
+      const drawIn = (el, delay, duration, easing) => {
+        const len = el.getTotalLength ? el.getTotalLength() : 0;
+        return anim(el, [{ strokeDasharray: `${len} ${len}`, strokeDashoffset: len }, { strokeDasharray: `${len} ${len}`, strokeDashoffset: 0 }], { delay, duration, easing: easing || EASE_IO });
       };
-      function finish() {
+      const skip = () => { anims.forEach((a) => { try { a.finish(); } catch (e) { /* noop */ } }); lift(); };
+      // letters are measured once the name's typeface is in, so a late font never moves them off their stays
+      const settled = () => {
+        try {
+          const cs = getComputedStyle(word), font = `${cs.fontStyle} ${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+          if (!document.fonts || document.fonts.check(font)) return Promise.resolve();
+          return Promise.race([document.fonts.load(font), new Promise((r) => setTimeout(r, 1300))]);
+        } catch (e) { return Promise.resolve(); }
+      };
+      fontsP.then(settled, settled).then(build, build);
+
+      function build() {
+        try {
+          const cs = getComputedStyle(word), text = word.textContent;
+          fs = parseFloat(cs.fontSize);
+          // each letter in its own span, still inline, so the name keeps its own spacing and kerning
+          word.textContent = '';
+          const spans = [...text].map((c) => { const sp = document.createElement('span'); sp.className = 'ch'; sp.textContent = c; word.append(sp); return sp; });
+          const box = word.getBoundingClientRect(), W = box.width, H = box.height;
+          // the baseline and each letter's top, so every stay lands on its letter
+          const ctx = document.createElement('canvas').getContext('2d');
+          ctx.font = `${cs.fontStyle} ${cs.fontWeight} ${fs}px ${cs.fontFamily}`;
+          const fm = ctx.measureText('Hg');
+          asc = fm.fontBoundingBoxAscent || fs * 0.8;
+          const r0 = spans[0].getBoundingClientRect();
+          yb = r0.top - box.top + asc;
+          const rig = document.createElementNS(SVGNS, 'svg');
+          rig.setAttribute('class', 'ld-rig'); rig.setAttribute('width', W); rig.setAttribute('height', H);
+          word.prepend(rig);
+          const mk = (tag, attrs) => { const e = document.createElementNS(SVGNS, tag); Object.keys(attrs).forEach((k) => e.setAttribute(k, attrs[k])); rig.append(e); return e; };
+          // on a phone held upright the pylon stands twice as tall, and the stays fall steeply to the letters
+          const tall = innerHeight > innerWidth * 4 / 3, xc = W / 2, top = yb - fs * (tall ? 2.6 : 1.3), deckY = yb + fs * 0.14;
+          const letters = [];
+          spans.forEach((sp, i) => {
+            const c = text[i];
+            if (!c.trim()) return;
+            const r = sp.getBoundingClientRect(), m = ctx.measureText(c);
+            const a = m.actualBoundingBoxAscent || fs * 0.5;
+            // italic: a letter's top sits a little right of its middle
+            letters.push({ sp, ax: r.left - box.left + r.width / 2 + a * 0.1, ay: yb - a - fs * 0.05 });
+          });
+          word.classList.add('set');
+          const far = Math.max(1, ...letters.map((t) => Math.abs(t.ax - xc)));
+          const T0 = 380, SPREAD = 1000, RISE = 460;
+          // the pylon first, out of the ground
+          drawIn(mk('line', { class: 'pyl', x1: xc, y1: deckY + fs * 0.2, x2: xc, y2: top }), 0, 440);
+          anim(mk('circle', { class: 'top', cx: xc, cy: top, r: 2.4 }), [{ opacity: 0 }, { opacity: 1 }], { delay: 380, duration: 200 });
+          // the deck grows out both ways at the pace the letters go in
+          const left = Math.min(...spans.map((sp) => sp.getBoundingClientRect().left)) - box.left - fs * 0.06;
+          [left, W + fs * 0.06].forEach((xe) => drawIn(mk('line', { class: 'dk', x1: xc, y1: deckY, x2: xe, y2: deckY }), T0 - 80, SPREAD + RISE - 120, 'linear'));
+          letters.forEach((t) => {
+            const d = T0 + (Math.abs(t.ax - xc) / far) * SPREAD;
+            drawIn(mk('line', { class: 'cab', x1: xc, y1: top + 3, x2: t.ax, y2: t.ay }), d - 90, 320);
+            anim(mk('circle', { class: 'anc', cx: t.ax, cy: t.ay, r: 1.8 }), [{ opacity: 0 }, { opacity: 1 }], { delay: d + 160, duration: 160 });
+            anim(t.sp, [{ opacity: 0, top: `${(fs * 0.34).toFixed(1)}px` }, { opacity: 1, top: '0px' }], { delay: d, duration: RISE, easing: EASE_OUT });
+          });
+          // every letter is in: the stays and the pylon come off, the name stays on its deck
+          const end = T0 + SPREAD + RISE;
+          $$('.cab, .anc, .pyl, .top', rig).forEach((el) => anim(el, [{ opacity: 1 }, { opacity: 0 }], { delay: end + 120, duration: 380, easing: 'ease-out', fill: 'forwards' }));
+          statusT = setTimeout(() => { if (status) status.textContent = 'Sheet 01 ready'; }, end);
+          liftT = setTimeout(lift, end + 420);
+          skipOn.forEach((t) => addEventListener(t, skip, { passive: true }));
+        } catch (err) { console.warn(err); lift(); }
+      }
+
+      function lift() {
+        if (lifted) return;
+        lifted = true;
+        clearTimeout(liftT); clearTimeout(statusT);
+        skipOn.forEach((t) => removeEventListener(t, skip));
         try { sessionStorage.setItem('sb-seen', '1'); } catch (e) { /* storage unavailable */ }
         if (status) status.textContent = 'Sheet 01 ready';
-        sunEl.animate([{ transform: 'scale(0)' }, { transform: 'scale(1)' }], { duration: 520, easing: EASE_OUT, fill: 'forwards' }).finished.then(() => {
-          const heroSun = $('.art .sun');
-          const r = heroSun ? heroSun.getBoundingClientRect() : null;
-          const s = sunEl.getBoundingClientRect();
-          loaderRan = true;
-          L.classList.add('lifting');
-          doc.classList.add('loaded');
-          resolve(true);
-          let fly;
-          if (r && r.width > 0 && r.bottom > 0) {
-            const dx = r.left + r.width / 2 - (s.left + s.width / 2), dy = r.top + r.height / 2 - (s.top + s.height / 2);
-            fly = sunEl.animate([{ transform: 'translate(0px,0px) scale(1)' }, { transform: `translate(${dx}px,${dy}px) scale(${r.width / s.width})` }],
-              { duration: 1150, easing: 'cubic-bezier(.76,0,.24,1)', fill: 'forwards' });
-          } else {
-            fly = sunEl.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, fill: 'forwards' });
-          }
-          fly.finished.then(() => L.classList.add('gone'));
-        });
+        // the name flies to the top bar as the sheet lifts away, baseline onto baseline
+        const brand = $('.nav .brand');
+        let br = null;
+        if (brand && fs) { const rg = document.createRange(); rg.selectNodeContents(brand); br = rg.getBoundingClientRect(); }
+        let fly;
+        if (br && br.width > 0 && br.bottom > 0) {
+          const wr = word.getBoundingClientRect(), k = parseFloat(getComputedStyle(brand).fontSize) / fs;
+          const dx = br.left - wr.left, dy = br.top + asc * k - (wr.top + yb * k);
+          nameFlight = 1050;
+          fly = word.animate([{ transform: 'none' }, { transform: `translate(${dx.toFixed(1)}px,${dy.toFixed(1)}px) scale(${k.toFixed(4)})` }],
+            { duration: nameFlight, easing: 'cubic-bezier(.76,0,.24,1)', fill: 'forwards' });
+        } else {
+          fly = word.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateY(-12px)' }], { duration: 500, easing: EASE_OUT, fill: 'forwards' });
+        }
+        L.classList.add('lifting');
+        doc.classList.add('loaded');
+        resolve(true);
+        const gone = () => L.classList.add('gone');
+        fly.finished.then(gone, gone);
       }
-      requestAnimationFrame(step);
     });
   }
 
